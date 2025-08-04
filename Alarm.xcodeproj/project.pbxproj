@@ -6,27 +6,8 @@
 	objectVersion = 77;
 	objects = {
 
-/* Begin PBXContainerItemProxy section */
-		E81B21F22E4105870038B490 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = E81B21D02E4105870038B490 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = E81B21D72E4105870038B490;
-			remoteInfo = Alarm;
-		};
-		E81B21FC2E4105870038B490 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = E81B21D02E4105870038B490 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = E81B21D72E4105870038B490;
-			remoteInfo = Alarm;
-		};
-/* End PBXContainerItemProxy section */
-
 /* Begin PBXFileReference section */
 		E81B21D82E4105870038B490 /* Alarm.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Alarm.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		E81B21F12E4105870038B490 /* AlarmTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AlarmTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		E81B21FB2E4105870038B490 /* AlarmUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AlarmUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -48,34 +29,10 @@
 			path = Alarm;
 			sourceTree = "<group>";
 		};
-		E81B21F42E4105870038B490 /* AlarmTests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = AlarmTests;
-			sourceTree = "<group>";
-		};
-		E81B21FE2E4105870038B490 /* AlarmUITests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = AlarmUITests;
-			sourceTree = "<group>";
-		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		E81B21D52E4105870038B490 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		E81B21EE2E4105870038B490 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		E81B21F82E4105870038B490 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -89,8 +46,6 @@
 			isa = PBXGroup;
 			children = (
 				E81B21DA2E4105870038B490 /* Alarm */,
-				E81B21F42E4105870038B490 /* AlarmTests */,
-				E81B21FE2E4105870038B490 /* AlarmUITests */,
 				E81B21D92E4105870038B490 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -99,8 +54,6 @@
 			isa = PBXGroup;
 			children = (
 				E81B21D82E4105870038B490 /* Alarm.app */,
-				E81B21F12E4105870038B490 /* AlarmTests.xctest */,
-				E81B21FB2E4105870038B490 /* AlarmUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -130,52 +83,6 @@
 			productReference = E81B21D82E4105870038B490 /* Alarm.app */;
 			productType = "com.apple.product-type.application";
 		};
-		E81B21F02E4105870038B490 /* AlarmTests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = E81B22092E4105870038B490 /* Build configuration list for PBXNativeTarget "AlarmTests" */;
-			buildPhases = (
-				E81B21ED2E4105870038B490 /* Sources */,
-				E81B21EE2E4105870038B490 /* Frameworks */,
-				E81B21EF2E4105870038B490 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				E81B21F32E4105870038B490 /* PBXTargetDependency */,
-			);
-			fileSystemSynchronizedGroups = (
-				E81B21F42E4105870038B490 /* AlarmTests */,
-			);
-			name = AlarmTests;
-			packageProductDependencies = (
-			);
-			productName = AlarmTests;
-			productReference = E81B21F12E4105870038B490 /* AlarmTests.xctest */;
-			productType = "com.apple.product-type.bundle.unit-test";
-		};
-		E81B21FA2E4105870038B490 /* AlarmUITests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = E81B220C2E4105870038B490 /* Build configuration list for PBXNativeTarget "AlarmUITests" */;
-			buildPhases = (
-				E81B21F72E4105870038B490 /* Sources */,
-				E81B21F82E4105870038B490 /* Frameworks */,
-				E81B21F92E4105870038B490 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				E81B21FD2E4105870038B490 /* PBXTargetDependency */,
-			);
-			fileSystemSynchronizedGroups = (
-				E81B21FE2E4105870038B490 /* AlarmUITests */,
-			);
-			name = AlarmUITests;
-			packageProductDependencies = (
-			);
-			productName = AlarmUITests;
-			productReference = E81B21FB2E4105870038B490 /* AlarmUITests.xctest */;
-			productType = "com.apple.product-type.bundle.ui-testing";
-		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -188,14 +95,6 @@
 				TargetAttributes = {
 					E81B21D72E4105870038B490 = {
 						CreatedOnToolsVersion = 16.4;
-					};
-					E81B21F02E4105870038B490 = {
-						CreatedOnToolsVersion = 16.4;
-						TestTargetID = E81B21D72E4105870038B490;
-					};
-					E81B21FA2E4105870038B490 = {
-						CreatedOnToolsVersion = 16.4;
-						TestTargetID = E81B21D72E4105870038B490;
 					};
 				};
 			};
@@ -214,28 +113,12 @@
 			projectRoot = "";
 			targets = (
 				E81B21D72E4105870038B490 /* Alarm */,
-				E81B21F02E4105870038B490 /* AlarmTests */,
-				E81B21FA2E4105870038B490 /* AlarmUITests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		E81B21D62E4105870038B490 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		E81B21EF2E4105870038B490 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		E81B21F92E4105870038B490 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -252,34 +135,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		E81B21ED2E4105870038B490 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		E81B21F72E4105870038B490 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXSourcesBuildPhase section */
-
-/* Begin PBXTargetDependency section */
-		E81B21F32E4105870038B490 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = E81B21D72E4105870038B490 /* Alarm */;
-			targetProxy = E81B21F22E4105870038B490 /* PBXContainerItemProxy */;
-		};
-		E81B21FD2E4105870038B490 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = E81B21D72E4105870038B490 /* Alarm */;
-			targetProxy = E81B21FC2E4105870038B490 /* PBXContainerItemProxy */;
-		};
-/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		E81B22052E4105870038B490 /* Debug */ = {
@@ -294,9 +150,9 @@
 				INFOPLIST_FILE = Alarm/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
-				INFOPLIST_KEY_UIMainStoryboardFile = Main;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -322,9 +178,9 @@
 				INFOPLIST_FILE = Alarm/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
-				INFOPLIST_KEY_UIMainStoryboardFile = Main;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -459,78 +315,6 @@
 			};
 			name = Release;
 		};
-		E81B220A2E4105870038B490 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = Y774295X22;
-				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.hxxru.AlarmTests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Alarm.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Alarm";
-			};
-			name = Debug;
-		};
-		E81B220B2E4105870038B490 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = Y774295X22;
-				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.hxxru.AlarmTests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Alarm.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Alarm";
-			};
-			name = Release;
-		};
-		E81B220D2E4105870038B490 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = Y774295X22;
-				GENERATE_INFOPLIST_FILE = YES;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.hxxru.AlarmUITests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = Alarm;
-			};
-			name = Debug;
-		};
-		E81B220E2E4105870038B490 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = Y774295X22;
-				GENERATE_INFOPLIST_FILE = YES;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.hxxru.AlarmUITests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = Alarm;
-			};
-			name = Release;
-		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -548,24 +332,6 @@
 			buildConfigurations = (
 				E81B22052E4105870038B490 /* Debug */,
 				E81B22062E4105870038B490 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		E81B22092E4105870038B490 /* Build configuration list for PBXNativeTarget "AlarmTests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				E81B220A2E4105870038B490 /* Debug */,
-				E81B220B2E4105870038B490 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		E81B220C2E4105870038B490 /* Build configuration list for PBXNativeTarget "AlarmUITests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				E81B220D2E4105870038B490 /* Debug */,
-				E81B220E2E4105870038B490 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
