@@ -1,12 +1,12 @@
-name: "📋 doc"
+name: "📋 docs"
 description: "데이터 파일, 문서, 자료"
-labels: ["doc"]
+labels: ["docs"]
 body:
   - type: textarea
     attributes:
       label: "🌱 브랜치 이름"
       description: "작업할 브랜치 이름을 입력해주세요."
-      placeholder: "doc/?-"
+      placeholder: "docs/?-"
     validations:
       required: true
 

@@ -1,4 +1,4 @@
-name: "✅ add Report"
+name: "✅ add"
 description: "파일, 패키지를 추가"
 labels: ["add"]
 body:
