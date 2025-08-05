@@ -9,12 +9,14 @@ import UIKit
 
 final class StopwatchViewController: UIViewController {
     // MARK: - Lifecycle
+
     override func viewDidLoad() {
         super.viewDidLoad()
         configureUI()
     }
 
     // MARK: - Private Methods
+
     private func configureUI() {
         view.backgroundColor = .systemBackground
         title = "스톱워치"
