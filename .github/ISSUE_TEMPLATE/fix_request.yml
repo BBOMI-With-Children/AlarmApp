@@ -4,9 +4,9 @@ labels: ["fix"]
 body:
   - type: textarea
     attributes:
-    label: "🌱 브랜치 이름"
-    description: "작업할 브랜치 이름을 입력해주세요."
-    default: "fix/?-"
+      label: "🌱 브랜치 이름"
+      description: "작업할 브랜치 이름을 입력해주세요."
+      default: "fix/?-"
     validations:
       required: true
 
