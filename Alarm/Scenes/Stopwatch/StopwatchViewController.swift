@@ -8,17 +8,17 @@
 import UIKit
 
 final class StopwatchViewController: UIViewController {
-    // MARK: - Lifecycle
+  // MARK: - Lifecycle
 
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        configureUI()
-    }
+  override func viewDidLoad() {
+    super.viewDidLoad()
+    configureUI()
+  }
 
-    // MARK: - Private Methods
+  // MARK: - Private Methods
 
-    private func configureUI() {
-        view.backgroundColor = .systemBackground
-        title = "스톱워치"
-    }
+  private func configureUI() {
+    view.backgroundColor = .systemBackground
+    title = "스톱워치"
+  }
 }
