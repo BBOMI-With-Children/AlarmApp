@@ -4,9 +4,9 @@ labels: ["add"]
 body:
   - type: textarea
     attributes:
-    label: "🌱 브랜치 이름"
-    description: "작업할 브랜치 이름을 입력해주세요."
-    default: "add/?-"
+      label: "🌱 브랜치 이름"
+      description: "작업할 브랜치 이름을 입력해주세요."
+      default: "add/?-"
     validations:
       required: true
 
