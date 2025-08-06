@@ -50,10 +50,12 @@ final class MainTabBarController: UITabBarController {
     // 배경 색 다크
     appearance.backgroundColor = .black
 
+    let mainColor = UIColor(named: "mainColor") ?? .systemBlue
+
     // 선택된 아이콘 색
     let selected = appearance.stackedLayoutAppearance.selected
-    selected.iconColor = .systemOrange
-    selected.titleTextAttributes = [.foregroundColor: UIColor.systemOrange]
+    selected.iconColor = mainColor
+    selected.titleTextAttributes = [.foregroundColor: mainColor]
 
     // 비선택 아이템 색
     let normal = appearance.stackedLayoutAppearance.normal
