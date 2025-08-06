@@ -14,6 +14,7 @@ final class TimerViewController: UIViewController {
 
   private lazy var timerTableView = UITableView(frame: .zero, style: .plain).then {
     $0.separatorInset = UIEdgeInsets(top: 0, left: 20, bottom: 0, right: 20)
+    $0.separatorStyle = .none
     $0.showsVerticalScrollIndicator = true
     $0.backgroundColor = .clear
   }
@@ -61,7 +62,7 @@ final class TimerViewController: UIViewController {
   // MARK: - Private Methods
 
   private func configureUI() {
-    view.backgroundColor = .systemBackground
+    view.backgroundColor = UIColor(named: "backgroundColor")
     title = "타이머"
     
     navigationController?.navigationBar.prefersLargeTitles = true
@@ -84,7 +85,7 @@ final class TimerViewController: UIViewController {
       },
       menu: nil
     ).then {
-      $0.tintColor = .systemOrange
+      $0.tintColor = UIColor(named: "mainColor")
     }
 
     navigationItem.leftBarButtonItem = UIBarButtonItem(
@@ -92,8 +93,17 @@ final class TimerViewController: UIViewController {
       primaryAction: nil,
       menu: nil
     ).then {
-      $0.tintColor = .systemOrange
+      $0.tintColor = UIColor(named: "mainColor")
     }
+    
+    let appearance = UINavigationBarAppearance()
+    appearance.configureWithOpaqueBackground()
+    appearance.backgroundColor = UIColor(named: "backgroundColor")
+    
+    appearance.shadowColor = .clear
+
+    navigationController?.navigationBar.standardAppearance = appearance
+    navigationController?.navigationBar.scrollEdgeAppearance = appearance
   }
 
   private func presentAddTimerViewController() {
@@ -113,7 +123,7 @@ struct TimerItem {
   let isActive: Bool
 }
 
-// MARK: - UITableViewDataSource
+// MARK: - UITableView
 
 extension TimerViewController: UITableViewDataSource {
   func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -133,5 +143,4 @@ extension TimerViewController: UITableViewDataSource {
     return cell
   }
 }
-
 // MARK: Button Function

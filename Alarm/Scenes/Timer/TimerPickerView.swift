@@ -47,10 +47,12 @@ final class TimerPickerView: UIView {
     $0.layer.cornerRadius = 8
     $0.isLayoutMarginsRelativeArrangement = true
     $0.layoutMargins = UIEdgeInsets(top: 8, left: 16, bottom: 8, right: 16)
+    $0.backgroundColor = UIColor(named: "modalColor")
   }
   
   override init(frame: CGRect) {
     super.init(frame: frame)
+    backgroundColor = UIColor(named: "backgroundColor")
     setupPicker()
     setupLabels()
     userTextField.delegate = self

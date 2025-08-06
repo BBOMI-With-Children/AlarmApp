@@ -25,16 +25,16 @@ class TimerTableViewCell: UITableViewCell {
   
   private let button = UIButton().then {
     $0.setTitle("", for: .normal)
-    $0.setTitleColor(.systemOrange, for: .normal)
+    $0.setTitleColor(UIColor(named: "mainColor"), for: .normal)
     // $0.titleLabel?.font = .systemFont(ofSize: 20, weight: .bold)
-    $0.tintColor = .systemOrange
+    $0.tintColor = UIColor(named: "mainColor")
     $0.contentHorizontalAlignment = .center
     
     // $0.layoutMargins = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
     
     $0.layer.cornerRadius = 20
     $0.layer.borderWidth = 3
-    $0.layer.borderColor = UIColor.systemOrange.cgColor
+    $0.layer.borderColor = UIColor(named: "mainColor")?.cgColor
     $0.clipsToBounds = true
     // 􀊆 = Pause
   }
@@ -50,14 +50,20 @@ class TimerTableViewCell: UITableViewCell {
     $0.spacing = 20
     $0.axis = .horizontal
     $0.layer.cornerRadius = 8
-    $0.backgroundColor = .blue
+    // $0.backgroundColor = UIColor(named: "sectionColor")
   }
 
   override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
     super.init(style: style, reuseIdentifier: reuseIdentifier)
-    contentView.backgroundColor = .blue
+    contentView.backgroundColor = UIColor(named: "sectionColor")
+    backgroundColor = .clear
     contentView.layer.cornerRadius = 8
     setupViews()
+  }
+  
+  override func layoutSubviews() {
+    super.layoutSubviews()
+    contentView.frame = contentView.frame.inset(by: UIEdgeInsets(top: 0, left: 10, bottom: 10, right: 10))
   }
 
   required init?(coder: NSCoder) {
@@ -84,21 +90,21 @@ class TimerTableViewCell: UITableViewCell {
     }
 
     timerLabel.snp.makeConstraints {
-      $0.top.equalToSuperview().inset(20)
-      $0.leading.equalToSuperview().inset(10)
+      $0.top.equalToSuperview().inset(10)
+      $0.leading.equalToSuperview().inset(25)
     }
     
     button.snp.makeConstraints {
-      $0.centerY.equalToSuperview()
-      $0.trailing.equalToSuperview().inset(20)
+      $0.centerY.equalTo(timerLabel.snp.centerY)
+      $0.trailing.equalToSuperview().inset(30)
       $0.height.width.equalTo(40)
     }
     
     userLabel.snp.makeConstraints {
-      $0.top.equalTo(timerLabel.snp.bottom).offset(10)
-      $0.leading.equalToSuperview().inset(10)
+      $0.top.equalTo(timerLabel.snp.bottom).offset(-4)
+      $0.leading.equalToSuperview().inset(25)
       $0.trailing.equalTo(button.snp.leading).offset(-10)
-      $0.bottom.equalToSuperview().inset(10)
+      $0.bottom.equalToSuperview().inset(20)
     }
     
     // timerLabel.snp.makeConstraints {

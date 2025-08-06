@@ -22,7 +22,7 @@ class AddTimerViewController: UIViewController {
   }
 
   private func configureUI() {
-    view.backgroundColor = .systemBackground
+    view.backgroundColor = UIColor(named: "backgroundColor")
     title = "타이머"
     navigationController?.navigationBar.prefersLargeTitles = true
     navigationItem.largeTitleDisplayMode = .always
@@ -41,7 +41,7 @@ class AddTimerViewController: UIViewController {
     navigationItem.rightBarButtonItem = UIBarButtonItem(
       title: "시작", style: .plain, target: self, action: #selector(addTimer)
     ).then {
-      $0.tintColor = .systemOrange
+      $0.tintColor = UIColor(named: "mainColor")
     }
 
     navigationItem.leftBarButtonItem = UIBarButtonItem(
@@ -51,7 +51,7 @@ class AddTimerViewController: UIViewController {
       },
       menu: nil
     ).then {
-      $0.tintColor = .systemOrange
+      $0.tintColor = UIColor(named: "mainColor")
     }
   }
   
