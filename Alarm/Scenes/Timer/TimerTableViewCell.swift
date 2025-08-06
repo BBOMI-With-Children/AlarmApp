@@ -23,8 +23,9 @@ class TimerTableViewCell: UITableViewCell {
   
   private let button = UIButton().then {
     $0.setTitle("", for: .normal)
-    $0.setTitleColor(.orange, for: .normal)
-    $0.titleLabel?.font = .systemFont(ofSize: 20, weight: .bold)
+    $0.setTitleColor(.systemOrange, for: .normal)
+    // $0.titleLabel?.font = .systemFont(ofSize: 20, weight: .bold)
+    $0.tintColor = .systemOrange
     $0.contentHorizontalAlignment = .center
     // 􀊆 = Pause
   }
