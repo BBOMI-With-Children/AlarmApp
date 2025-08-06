@@ -44,12 +44,11 @@ final class TimerPickerView: UIView {
   private let userStack = UIStackView().then {
     $0.axis = .horizontal
     $0.spacing = 8
+    $0.layer.cornerRadius = 8
+    $0.isLayoutMarginsRelativeArrangement = true
+    $0.layoutMargins = UIEdgeInsets(top: 8, left: 16, bottom: 8, right: 16)
   }
-  //
-  // private let alarmLabel = UILabel().then {
-  //   $0.text = "알람"
-  // }
-
+  
   override init(frame: CGRect) {
     super.init(frame: frame)
     setupPicker()
@@ -78,26 +77,6 @@ final class TimerPickerView: UIView {
     [userLabel, userTextField].forEach {
       userStack.addArrangedSubview($0)
     }
-
-    // hourLabel.snp.makeConstraints {
-    //   $0.centerY.equalTo(timerPicker)
-    //   // $0.leading.equalTo(timerPicker).offset(10)
-    // }
-
-    // minuteLabel.snp.makeConstraints {
-    //   $0.centerY.equalTo(timerPicker)
-    //   // $0.leading.equalTo(timerPicker).offset(10)
-    // }
-
-    // secondLabel.snp.makeConstraints {
-    //   $0.centerY.equalTo(timerPicker)
-    //   // $0.trailing.equalTo(timerPicker).inset(10)
-    // }
-    //
-    // timerPicker.snp.makeConstraints {
-    //   $0.leading.equalToSuperview().offset(50)
-    //   $0.trailing.equalToSuperview().offset(-50)
-    // }
 
     userStack.snp.makeConstraints {
       $0.top.equalTo(timerPicker.snp.bottom)
