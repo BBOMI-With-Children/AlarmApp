@@ -10,6 +10,8 @@ import Then
 import UIKit
 
 class TimerTableViewCell: UITableViewCell {
+  static let reuseIdentifier = "TimerCell"
+
   private let timerLabel = UILabel().then {
     $0.numberOfLines = 0
     $0.font = .systemFont(ofSize: 50, weight: .light)
