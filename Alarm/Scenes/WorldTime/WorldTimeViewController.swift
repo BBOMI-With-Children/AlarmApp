@@ -20,8 +20,9 @@ final class WorldTimeViewController: UIViewController {
   // MARK: - Properties
   private var isEditingMode = false
   private var items = ["서울", "도쿄", "런던"]
+  private let editButton = UIBarButtonItem(title: "편집", style: .plain, target: nil, action: nil)
+  private let addButton = UIBarButtonItem(barButtonSystemItem: .add, target: nil, action: nil)
   private lazy var dataSource = makeDataSource()
-  
   private let disposeBag = DisposeBag()
   
   private let collectionView = UICollectionView(
@@ -42,6 +43,7 @@ final class WorldTimeViewController: UIViewController {
     configureUI()
     configureLayout()
     configureNavigationBar()
+    bind()
     applySnapshot()
   }
   
@@ -65,18 +67,26 @@ final class WorldTimeViewController: UIViewController {
   // 네비게이션 바
   private func configureNavigationBar() {
     title = "세계 시계"
-    navigationItem.leftBarButtonItem = UIBarButtonItem(
-      title: "편집",
-      style: .plain,
-      target: self,
-      action: #selector(didTapEditButton)
-    )
+    navigationItem.leftBarButtonItem = editButton
+    navigationItem.rightBarButtonItem = addButton
+  }
+  
+  // bind
+  private func bind() {
+    editButton.rx.tap
+      .withUnretained(self) // [weak self]처럼 약한 참조 + nil이면 자동으로 이벤트 무시
+      .subscribe(onNext: { owner, _ in
+        owner.isEditingMode.toggle()
+        owner.setEditing(owner.isEditingMode, animated: true)
+        owner.editButton.title = owner.isEditingMode ? "완료" : "편집"
+      })
+      .disposed(by: disposeBag)
     
-    navigationItem.rightBarButtonItem = UIBarButtonItem(
-      barButtonSystemItem: .add,
-      target: self,
-      action: #selector(didTapAddButton)
-    )
+    addButton.rx.tap
+      .subscribe(onNext: {
+        print("Modal 띄우기 예정")
+      })
+      .disposed(by: disposeBag)
   }
   
   // Diffable DataSource
@@ -124,17 +134,5 @@ final class WorldTimeViewController: UIViewController {
     snapshot.appendSections([.main])
     snapshot.appendItems(items) // 더미 items 데이터
     dataSource.apply(snapshot, animatingDifferences: true)
-  }
-  
-  // MARK: - Actions
-  
-  @objc private func didTapEditButton() {
-    isEditingMode.toggle()
-    setEditing(isEditingMode, animated: true) // 오버라이드한 setEditing 메서드 호출
-    navigationItem.leftBarButtonItem?.title = isEditingMode ? "완료" : "편집"
-  }
-  
-  @objc private func didTapAddButton() {
-    print("Modal 추가 예정 & Rx로")
   }
 }
