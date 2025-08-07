@@ -16,51 +16,48 @@ class TimerTableViewCell: UITableViewCell {
     $0.numberOfLines = 0
     $0.font = .systemFont(ofSize: 50, weight: .light)
   }
-  
+
   private let userLabel = UILabel().then {
     $0.numberOfLines = 4
     $0.lineBreakMode = .byWordWrapping
     $0.font = .systemFont(ofSize: 14, weight: .light)
   }
-  
+
   private let button = UIButton().then {
     $0.setTitle("", for: .normal)
     $0.setTitleColor(UIColor(named: "mainColor"), for: .normal)
-    // $0.titleLabel?.font = .systemFont(ofSize: 20, weight: .bold)
     $0.tintColor = UIColor(named: "mainColor")
     $0.contentHorizontalAlignment = .center
-    
-    // $0.layoutMargins = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
-    
+
     $0.layer.cornerRadius = 20
     $0.layer.borderWidth = 3
     $0.layer.borderColor = UIColor(named: "mainColor")?.cgColor
     $0.clipsToBounds = true
     // 􀊆 = Pause
   }
- 
+
   private let labelStack = UIStackView().then {
     $0.alignment = .leading
     $0.axis = .vertical
     $0.spacing = 4
   }
-  
+
   private let fullStack = UIStackView().then {
     $0.alignment = .fill
     $0.spacing = 20
     $0.axis = .horizontal
     $0.layer.cornerRadius = 8
-    // $0.backgroundColor = UIColor(named: "sectionColor")
   }
 
   override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
     super.init(style: style, reuseIdentifier: reuseIdentifier)
     contentView.backgroundColor = UIColor(named: "sectionColor")
+    selectionStyle.self = .none
     backgroundColor = .clear
     contentView.layer.cornerRadius = 8
     setupViews()
   }
-  
+
   override func layoutSubviews() {
     super.layoutSubviews()
     contentView.frame = contentView.frame.inset(by: UIEdgeInsets(top: 0, left: 10, bottom: 10, right: 10))
@@ -71,20 +68,6 @@ class TimerTableViewCell: UITableViewCell {
   }
 
   private func setupViews() {
-    // contentView.addSubview(fullStack)
-    // [timerLabel, userLabel].forEach {
-    //   labelStack.addArrangedSubview($0)
-    // }
-    // [labelStack, button].forEach {
-    //   fullStack.addArrangedSubview($0)
-    // }
-    // 
-    // fullStack.snp.makeConstraints {
-    //   $0.top.equalToSuperview().inset(20)
-    //   $0.bottom.equalToSuperview().inset(10)
-    //   $0.leading.equalToSuperview().inset(20)
-    //   $0.trailing.equalToSuperview().offset(-40)
-    // }
     [timerLabel, userLabel, button].forEach {
       addSubview($0)
     }
@@ -93,40 +76,43 @@ class TimerTableViewCell: UITableViewCell {
       $0.top.equalToSuperview().inset(10)
       $0.leading.equalToSuperview().inset(25)
     }
-    
+
     button.snp.makeConstraints {
       $0.centerY.equalTo(timerLabel.snp.centerY)
       $0.trailing.equalToSuperview().inset(30)
       $0.height.width.equalTo(40)
     }
-    
+
     userLabel.snp.makeConstraints {
-      $0.top.equalTo(timerLabel.snp.bottom).offset(-4)
+      $0.top.equalTo(timerLabel.snp.bottom).offset(0)
       $0.leading.equalToSuperview().inset(25)
       $0.trailing.equalTo(button.snp.leading).offset(-10)
       $0.bottom.equalToSuperview().inset(20)
     }
-    
-    // timerLabel.snp.makeConstraints {
-    //   $0.top.equalToSuperview()
-    //   $0.leading.equalToSuperview()
-    // }
-    // 
-    // userLabel.snp.makeConstraints {
-    //   $0.bottom.equalToSuperview()
-    //   $0.leading.equalToSuperview()
-    // }
-   
-    // button.snp.makeConstraints {
-    //   $0.top.equalToSuperview()
-    //   $0.trailing.equalToSuperview()
-    // }
   }
 
   func configureUI(with item: TimerItem) {
-    timerLabel.text = "\(Int(item.time)) 초"
+    timerLabel.text = formattedTime(item.time)
     userLabel.text = "\(item.label)"
     button
       .setImage(item.isActive ? UIImage(systemName: "pause.fill") : UIImage(systemName: "play.fill"), for: .normal)
+  }
+
+  private func formattedTime(_ interval: TimeInterval) -> String {
+    let timeInterval = Int(interval)
+    let hours = timeInterval / 3600
+    let minutes = (timeInterval % 3600) / 60
+    let seconds = timeInterval % 60
+
+    if hours == 0 {
+      // 00:00
+      return String(format: "%02d:%02d", minutes, seconds)
+    } else if hours < 10 {
+      // 0:00:00
+      return String(format: "%d:%02d:%02d", hours, minutes, seconds)
+    } else {
+      // 00:00:00
+      return String(format: "%02d:%02d:%02d", hours, minutes, seconds)
+    }
   }
 }

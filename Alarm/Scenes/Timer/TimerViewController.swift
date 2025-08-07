@@ -8,6 +8,7 @@
 import SnapKit
 import Then
 import UIKit
+import RxSwift
 
 final class TimerViewController: UIViewController {
   // MARK: - Lifecycle
@@ -19,42 +20,20 @@ final class TimerViewController: UIViewController {
     $0.backgroundColor = .clear
   }
 
-  let testTimerData: [TimerItem] = [
-    TimerItem(
-      time: 180,
-      label: "4ㅕㄹㅋ햐캏캫ㅋㅎ탸아랴패ㅞㅓㅣ처근런하ㅓ니ㅓ널컬냫ㄴㅎㅛ려려녀쟈래ㅔ헤ㅗㅔㅗㅔㅠㅐㅓㅔㅠㅔㅠㅔ해겯ㄷㅅㄴㅅ아히허여너하파파챠오너아하뎌대하랴야래랴럏ㅇㅅ묘라하러파ㅠㅓ포초포ㅗ퍼포툐용",
-      alarmName: "래디얼",
-      isActive: true
-    ),
-    TimerItem(
-      time: 180,
-      label: "4ㅕㄹㅋ햐캏캫ㅋㅎ탸아랴패ㅞㅓㅣ처근런하ㅓ니ㅓ널컬냫ㄴㅎㅛ려려녀쟈래ㅔ헤ㅗㅔㅗㅔㅠㅐㅓㅔㅠㅔㅠㅔ해겯ㄷㅅㄴㅅ아히허여너하파파챠오너아하뎌대하랴야래랴럏ㅇㅅ묘라하러파ㅠㅓ포초포ㅗ퍼포툐용",
-      alarmName: "래디얼",
-      isActive: true
-    ),
-    TimerItem(
-      time: 180,
-      label: "4ㅕㄹㅋ햐캏캫ㅋㅎ탸아랴패ㅞㅓㅣ처근런하ㅓ니ㅓ널컬냫ㄴㅎㅛ려려녀쟈래ㅔ헤ㅗㅔㅗㅔㅠㅐㅓㅔㅠㅔㅠㅔ해겯ㄷㅅㄴㅅ아히허여너하파파챠오너아하뎌대하랴야래랴럏ㅇㅅ묘라하러파ㅠㅓ포초포ㅗ퍼포툐용",
-      alarmName: "래디얼",
-      isActive: true
-    ),
-    TimerItem(
-      time: 180,
-        label: "4ㅕㄹㅋ햐캏캫ㅋㅎ탸아랴패ㅞㅓㅣ처근런하ㅓ니ㅓ널컬냫ㄴㅎㅛ려려녀쟈래ㅔ헤ㅗㅔㅗㅔㅠㅐㅓㅔㅠㅔㅠㅔ해겯ㄷㅅㄴㅅ아히허여너하파파챠오너아하뎌대하랴야래랴럏ㅇㅅ묘라하러파ㅠㅓ포초포ㅗ퍼포툐용",
-        alarmName: "래디얼",
-        isActive: true
-      ),
-      TimerItem(
-        time: 180,
-      label: "4ㅕㄹㅋ햐캏캫ㅋㅎ탸아랴패ㅞㅓㅣ처근런하ㅓ니ㅓ널컬냫ㄴㅎㅛ려려녀쟈래ㅔ헤ㅗㅔㅗㅔㅠㅐㅓㅔㅠㅔㅠㅔ해겯ㄷㅅㄴㅅ아히허여너하파파챠오너아하뎌대하랴야래랴럏ㅇㅅ묘라하러파ㅠㅓ포초포ㅗ퍼포툐용",
-      alarmName: "래디얼",
-      isActive: true
-    ),
-    TimerItem(time: 300, label: "5분", alarmName: "래디얼", isActive: false),
-  ]
-
+  private let disposeBag = DisposeBag()
+  private var timerItems: [TimerItem] = []
+  
   override func viewDidLoad() {
     super.viewDidLoad()
+    TimerDataManager.shared.loadTimers() // 타이머 데이터 조회
+    
+    TimerDataManager.shared.timers // timers에 변동이 생기면
+      .subscribe(onNext: { [weak self] items in
+        self?.timerItems = items
+        self?.timerTableView.reloadData() // 테이블뷰 새로고침
+      })
+      .disposed(by: disposeBag)
+    
     configureUI()
     setupNavigationBar()
   }
@@ -64,7 +43,7 @@ final class TimerViewController: UIViewController {
   private func configureUI() {
     view.backgroundColor = UIColor(named: "backgroundColor")
     title = "타이머"
-    
+
     navigationController?.navigationBar.prefersLargeTitles = true
     navigationItem.largeTitleDisplayMode = .always
 
@@ -95,11 +74,11 @@ final class TimerViewController: UIViewController {
     ).then {
       $0.tintColor = UIColor(named: "mainColor")
     }
-    
+
     let appearance = UINavigationBarAppearance()
     appearance.configureWithOpaqueBackground()
     appearance.backgroundColor = UIColor(named: "backgroundColor")
-    
+
     appearance.shadowColor = .clear
 
     navigationController?.navigationBar.standardAppearance = appearance
@@ -112,15 +91,7 @@ final class TimerViewController: UIViewController {
     nav.modalPresentationStyle = .formSheet
     present(nav, animated: true)
   }
-}
 
-// MARK: - UITableViewDataStruct
-
-struct TimerItem {
-  let time: TimeInterval
-  let label: String
-  let alarmName: String
-  let isActive: Bool
 }
 
 // MARK: - UITableView
@@ -128,16 +99,18 @@ struct TimerItem {
 extension TimerViewController: UITableViewDataSource {
   func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
     // userDefault.count
-    return testTimerData.count
+    return timerItems.count
   }
 
   func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-    guard let cell = tableView.dequeueReusableCell(withIdentifier: TimerTableViewCell.reuseIdentifier, for: indexPath) as? TimerTableViewCell
+    guard
+      let cell = tableView.dequeueReusableCell(withIdentifier: TimerTableViewCell.reuseIdentifier, for: indexPath)
+        as? TimerTableViewCell
     else {
       return UITableViewCell()
     }
 
-    let item = testTimerData[indexPath.row]
+    let item = timerItems[indexPath.row]
     cell.configureUI(with: item)
 
     return cell
