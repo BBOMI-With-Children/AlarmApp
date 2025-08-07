@@ -30,7 +30,7 @@ final class WorldTimeViewController: UIViewController {
       var config = UICollectionLayoutListConfiguration(appearance: .insetGrouped)
       config.headerMode = .none
       config.showsSeparators = false // 구분선 없음
-      config.backgroundColor = UIColor(named: "backgroundColor")
+      config.backgroundColor = .systemBackground
       return UICollectionViewCompositionalLayout.list(using: config)
     }()
   )
@@ -53,7 +53,6 @@ final class WorldTimeViewController: UIViewController {
   // MARK: - Private Methods
 
   private func configureUI() {
-    view.backgroundColor = UIColor(named: "backgroundColor")
     view.addSubview(collectionView)
   }
   
