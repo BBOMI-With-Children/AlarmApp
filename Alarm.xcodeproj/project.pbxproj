@@ -63,9 +63,9 @@
 				E81B21DA2E4105870038B490 /* Alarm */,
 				E81B21D92E4105870038B490 /* Products */,
 			);
-			indentWidth = 4;
+			indentWidth = 2;
 			sourceTree = "<group>";
-			tabWidth = 4;
+			tabWidth = 2;
 			usesTabs = 0;
 		};
 		E81B21D92E4105870038B490 /* Products */ = {
