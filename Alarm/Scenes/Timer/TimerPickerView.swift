@@ -15,7 +15,9 @@ final class TimerPickerView: UIView {
   private let hours = Array(0...23)
   private let minutes = Array(0...59)
   private let seconds = Array(0...59)
-  
+
+  var onTimeChanged: ((TimeInterval) -> Void)?
+
   private let hourLabel = UILabel().then {
     $0.text = "시간"
   }
@@ -25,13 +27,13 @@ final class TimerPickerView: UIView {
   private let secondLabel = UILabel().then {
     $0.text = "초"
   }
-  
+
   private let userLabel = UILabel().then {
     $0.text = "레이블"
     $0.setContentHuggingPriority(.required, for: .horizontal)
     $0.setContentCompressionResistancePriority(.required, for: .horizontal)
   }
-  
+
   private let userTextField = UITextField().then {
     $0.placeholder = "타이머"
     $0.clearButtonMode = .whileEditing
@@ -41,7 +43,7 @@ final class TimerPickerView: UIView {
     $0.setContentHuggingPriority(.defaultLow, for: .horizontal)
     $0.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
   }
-  
+
   private let userStack = UIStackView().then {
     $0.axis = .horizontal
     $0.spacing = 8
@@ -50,7 +52,7 @@ final class TimerPickerView: UIView {
     $0.layoutMargins = UIEdgeInsets(top: 8, left: 16, bottom: 8, right: 16)
     $0.backgroundColor = UIColor(named: "modalColor")
   }
-  
+
   override init(frame: CGRect) {
     super.init(frame: frame)
     backgroundColor = UIColor(named: "backgroundColor")
@@ -58,11 +60,11 @@ final class TimerPickerView: UIView {
     setupLabels()
     userTextField.delegate = self
   }
-  
+
   required init?(coder: NSCoder) {
     fatalError("init(coder:) has not been implemented")
   }
-  
+
   private func setupPicker() {
     addSubview(timerPicker)
     timerPicker.delegate = self
@@ -71,56 +73,56 @@ final class TimerPickerView: UIView {
       $0.edges.equalToSuperview().inset(50)
     }
   }
-  
+
   private func setupLabels() {
     [hourLabel, minuteLabel, secondLabel, userStack].forEach {
       addSubview($0)
     }
-    
+
     [userLabel, userTextField].forEach {
       userStack.addArrangedSubview($0)
     }
-    
+
     userStack.snp.makeConstraints {
       $0.top.equalTo(timerPicker.snp.bottom)
       $0.horizontalEdges.equalToSuperview().inset(30)
     }
   }
-  
+
   private var pickerComponentWidth: CGFloat {
     // 너비 3등분
     UIScreen.main.bounds.width / 3
   }
-  
+
   var selectedHour: Int {
     timerPicker.selectedRow(inComponent: 0)
   }
-  
+
   var selectedMinute: Int {
     timerPicker.selectedRow(inComponent: 1)
   }
-  
+
   var selectedSecond: Int {
     timerPicker.selectedRow(inComponent: 2)
   }
-  
+
   func selectedTimeInterval() -> TimeInterval {
     TimeInterval(selectedHour * 3600 + selectedMinute * 60 + selectedSecond)
   }
-  
+
   func userLabelText() -> String {
     return userTextField.text ?? "타이머"
   }
-  
+
   func selectedTimeComponents() -> TimeComponents {
     return TimeComponents(hour: selectedHour, minute: selectedMinute, second: selectedSecond)
   }
-  
+
 }
 struct TimeComponents {
-    let hour: Int
-    let minute: Int
-    let second: Int
+  let hour: Int
+  let minute: Int
+  let second: Int
 }
 
 extension TimerPickerView: UIPickerViewDelegate, UIPickerViewDataSource {
@@ -140,14 +142,18 @@ extension TimerPickerView: UIPickerViewDelegate, UIPickerViewDataSource {
   func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
     switch component {
     case 0: return "\(hours[row])"
-    case 2: return "\(minutes[row])"
-    case 1: return "\(seconds[row])"
+    case 1: return "\(minutes[row])"
+    case 2: return "\(seconds[row])"
     default: return nil
     }
   }
 
   func pickerView(_ pickerView: UIPickerView, widthForComponent component: Int) -> CGFloat {
     return pickerView.frame.width / 3
+  }
+
+  func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
+    onTimeChanged?(selectedTimeInterval())
   }
 }
 

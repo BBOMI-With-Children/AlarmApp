@@ -23,20 +23,22 @@ final class TimerDataManager {  // 타이머 데이터 저장/조회
     }
   }
 
-  func loadTimers() { // userDefault 조회
-      if let data = UserDefaults.standard.data(forKey: key),
-         let loaded = try? JSONDecoder().decode([TimerItem].self, from: data) {
-          timers.onNext(loaded)
-      }
+  func loadTimers() {  // userDefault 조회
+    if let data = UserDefaults.standard.data(forKey: key),
+      let loaded = try? JSONDecoder().decode([TimerItem].self, from: data)
+    {
+      timers.onNext(loaded)
+    }
   }
-  
-  func addTimter(_ timer: TimerItem) { // 배열에 데이터 추가
+
+  func addTimer(_ timer: TimerItem) {  // 배열에 데이터 추가
     var current = (try? timers.value()) ?? []
     current.append(timer)
+    current = sortTimers(current)
     timers.onNext(current)
     saveTimers()
   }
-  
+
   func removeTimer(at index: Int) {
     var current = (try? timers.value()) ?? []
     guard current.indices.contains(index) else { return }
@@ -44,14 +46,22 @@ final class TimerDataManager {  // 타이머 데이터 저장/조회
     timers.onNext(current)
     saveTimers()
   }
-  
+
+  func sortTimers(_ items: [TimerItem]) -> [TimerItem] {
+    return items.sorted { lhs, rhs in
+      if lhs.time == rhs.time {
+        return lhs.id.uuidString < rhs.id.uuidString
+      }
+      return lhs.time < rhs.time
+    }
+  }
 }
 
 // MARK: - UITableViewDataStruct
 
 struct TimerItem: Codable {
   let id: UUID
-  let time: TimeInterval
+  var time: TimeInterval
   let label: String
-  let isActive: Bool
+  var isActive: Bool
 }
