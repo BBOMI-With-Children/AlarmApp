@@ -33,6 +33,7 @@ final class TimerDataManager {  // 타이머 데이터 저장/조회
   func addTimer(_ timer: TimerItem) { // 배열에 데이터 추가
     var current = (try? timers.value()) ?? []
     current.append(timer)
+    current = sortTimers(current)
     timers.onNext(current)
     saveTimers()
   }
@@ -43,6 +44,15 @@ final class TimerDataManager {  // 타이머 데이터 저장/조회
     current.remove(at: index)
     timers.onNext(current)
     saveTimers()
+  }
+  
+  func sortTimers(_ items: [TimerItem]) -> [TimerItem] {
+    return items.sorted { lhs, rhs in
+      if lhs.time == rhs.time {
+        return lhs.id.uuidString < rhs.id.uuidString
+      }
+      return lhs.time < rhs.time
+    }
   }
   
 }
