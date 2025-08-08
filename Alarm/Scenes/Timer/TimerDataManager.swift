@@ -30,7 +30,7 @@ final class TimerDataManager {  // 타이머 데이터 저장/조회
       }
   }
   
-  func addTimter(_ timer: TimerItem) { // 배열에 데이터 추가
+  func addTimer(_ timer: TimerItem) { // 배열에 데이터 추가
     var current = (try? timers.value()) ?? []
     current.append(timer)
     timers.onNext(current)
@@ -51,7 +51,7 @@ final class TimerDataManager {  // 타이머 데이터 저장/조회
 
 struct TimerItem: Codable {
   let id: UUID
-  let time: TimeInterval
+  var time: TimeInterval
   let label: String
-  let isActive: Bool
+  var isActive: Bool
 }
