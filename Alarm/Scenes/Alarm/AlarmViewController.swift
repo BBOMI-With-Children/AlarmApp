@@ -5,37 +5,91 @@
 //  Created by 노가현 on 8/5/25.
 //
 
+import RxCocoa
+import RxSwift
 import UIKit
 
 final class AlarmViewController: UIViewController {
   private let tableView = UITableView()
-
-  // MARK: - Lifecycle
+  private let disposeBag = DisposeBag()
 
   override func viewDidLoad() {
     super.viewDidLoad()
-
-    AlarmManager.shared.loadSampleData()
-
+    
+    let bg = UIColor(named: "backgroundColor")
+    let mainColor = UIColor(named: "mainColor")
+    
+    // MARK: - UI 설정
+    
+    view.backgroundColor = bg
+    tableView.backgroundColor = bg
     tableView.frame = view.bounds
-    tableView.dataSource = self
+    tableView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+    tableView.separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
+    tableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
     view.addSubview(tableView)
-  }
-}
+    
+    // MARK: - 네비게이션 바 설정
+    
+    title = "알람"
+    navigationController?.navigationBar.prefersLargeTitles = true
+    navigationController?.navigationBar.largeTitleTextAttributes = [
+      .font: UIFont.systemFont(ofSize: 28, weight: .bold)
+    ]
+    
+    // 편집 버튼
+    let editButton = UIBarButtonItem(title: "편집", style: .plain, target: nil, action: nil)
+    editButton.tintColor = mainColor
+    navigationItem.leftBarButtonItem = editButton
+    
+    // 추가 버튼
+    let addButton = UIBarButtonItem(barButtonSystemItem: .add, target: nil, action: nil)
+    addButton.tintColor = mainColor
+    navigationItem.rightBarButtonItem = addButton
+    
+    // MARK: - 데이터 로드
+    
+    _ = AlarmManager.shared // init 시 load(), 샘플 데이터 처리
+    
+    // MARK: - 테이블뷰 데이터 바인딩
+    
+    AlarmManager.shared.alarms
+      .asDriver()
+      .drive(tableView.rx.items(cellIdentifier: "cell")) { _, alarm, cell in
+        cell.backgroundColor = bg
+        var cfg = UIListContentConfiguration.valueCell()
+        cfg.text = "\(alarm.time) - \(alarm.subtitle)"
+        cfg.textProperties.font = .systemFont(ofSize: 20, weight: .regular)
+        cell.contentConfiguration = cfg
+        cell.selectionStyle = .none
+      }
+      .disposed(by: disposeBag)
+    
+    // MARK: - 편집 버튼 탭 시 편집 모드 토글
+    
+    editButton.rx.tap
+      .subscribe(onNext: { [weak self] in
+        guard let self else { return }
+        self.tableView.setEditing(!self.tableView.isEditing, animated: true)
+        self.navigationItem.leftBarButtonItem?.title = self.tableView.isEditing ? "완료" : "편집"
+      })
+      .disposed(by: disposeBag)
+    
+    // MARK: - + 버튼 탭 시 알람 추가
+    
+    addButton.rx.tap
+      .subscribe(onNext: {
+        let new = Alarm(time: "오전 6:00", subtitle: "주중", isOn: true) // 더미
+        AlarmManager.shared.add(new)
+      })
+      .disposed(by: disposeBag)
+    
+    // MARK: - 셀 삭제
 
-// MARK: - UITableViewDataSource
-
-extension AlarmViewController: UITableViewDataSource {
-  // 섹션별 행의 개수
-  func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-    AlarmManager.shared.alarms.count // 저장된 알람 개수
-  }
-
-  // 행에 표시할 셀
-  func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-    let cell = UITableViewCell() // 셀 생성
-    let alarm = AlarmManager.shared.alarms[indexPath.row] // 해당 위치의 알람 데이터
-    cell.textLabel?.text = "\(alarm.time) - \(alarm.subtitle)" // 셀에 알람 시간, 부제목 표시
-    return cell
+    tableView.rx.itemDeleted
+      .subscribe(onNext: { indexPath in
+        AlarmManager.shared.remove(at: indexPath.row)
+      })
+      .disposed(by: disposeBag)
   }
 }
