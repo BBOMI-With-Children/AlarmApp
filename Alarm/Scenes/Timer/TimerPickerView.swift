@@ -16,6 +16,8 @@ final class TimerPickerView: UIView {
   private let minutes = Array(0...59)
   private let seconds = Array(0...59)
   
+  var onTimeChanged: ((TimeInterval)->Void)?
+  
   private let hourLabel = UILabel().then {
     $0.text = "시간"
   }
@@ -140,14 +142,18 @@ extension TimerPickerView: UIPickerViewDelegate, UIPickerViewDataSource {
   func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
     switch component {
     case 0: return "\(hours[row])"
-    case 2: return "\(minutes[row])"
-    case 1: return "\(seconds[row])"
+    case 1: return "\(minutes[row])"
+    case 2: return "\(seconds[row])"
     default: return nil
     }
   }
 
   func pickerView(_ pickerView: UIPickerView, widthForComponent component: Int) -> CGFloat {
     return pickerView.frame.width / 3
+  }
+  
+  func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
+    onTimeChanged?(selectedTimeInterval())
   }
 }
 
