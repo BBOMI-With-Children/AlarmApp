@@ -79,13 +79,13 @@ final class AlarmViewController: UIViewController {
     
     addButton.rx.tap
       .subscribe(onNext: {
-        let new = Alarm(time: "오전 6:00", subtitle: "주중", isOn: true)
+        let new = Alarm(time: "오전 6:00", subtitle: "주중", isOn: true) // 더미
         AlarmManager.shared.add(new)
       })
       .disposed(by: disposeBag)
     
     // MARK: - 셀 삭제
-    
+
     tableView.rx.itemDeleted
       .subscribe(onNext: { indexPath in
         AlarmManager.shared.remove(at: indexPath.row)
