@@ -87,13 +87,13 @@ final class TimerViewController: UIViewController {
       $0.tintColor = UIColor(named: "mainColor")
     }
 
-    navigationItem.leftBarButtonItem = UIBarButtonItem(
-      title: "편집",
-      primaryAction: nil,
-      menu: nil
-    ).then {
-      $0.tintColor = UIColor(named: "mainColor")
-    }
+    // navigationItem.leftBarButtonItem = UIBarButtonItem(
+    //   title: "편집",
+    //   primaryAction: nil,
+    //   menu: nil
+    // ).then {
+    //   $0.tintColor = UIColor(named: "mainColor")
+    // }
 
     let appearance = UINavigationBarAppearance()
     appearance.configureWithOpaqueBackground()
