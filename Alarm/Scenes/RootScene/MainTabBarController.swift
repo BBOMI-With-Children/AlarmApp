@@ -48,7 +48,7 @@ final class MainTabBarController: UITabBarController {
     // 탭바 외관
     let appearance = UITabBarAppearance()
     // 배경 색 다크
-    appearance.backgroundColor = .black
+    appearance.backgroundColor = UIColor(named: "backgroundColor")
 
     let mainColor = UIColor(named: "mainColor") ?? .systemBlue
 

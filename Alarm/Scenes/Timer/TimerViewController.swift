@@ -9,6 +9,7 @@ import RxSwift
 import SnapKit
 import Then
 import UIKit
+import UserNotifications
 
 final class TimerViewController: UIViewController {
   // MARK: - Lifecycle
@@ -25,6 +26,9 @@ final class TimerViewController: UIViewController {
 
   override func viewDidLoad() {
     super.viewDidLoad()
+
+    requestNotificationPermission()  // 알림 권한 요청
+    UNUserNotificationCenter.current().delegate = self
     TimerDataManager.shared.loadTimers()  // 타이머 데이터 조회
 
     TimerDataManager.shared.timers  // timers 구독
@@ -40,16 +44,31 @@ final class TimerViewController: UIViewController {
         // 현재 저장된 데이터 조회
         guard var items = try? TimerDataManager.shared.timers.value() else { return }
         var changed = false  // 값 변화 추적
+        var finished: [TimerItem] = []  // 0이 된 타이머들
 
         for i in items.indices {  // 데이터 중
           if items[i].isActive, items[i].time > 0 {  // 타이머 진행 중 + 시간이 0보다 크면
             items[i].time -= 1  // 시간 1 감소
             changed = true  // 값 변화 확인
+
+            if items[i].time == 0 {
+              finished.append(items[i])
+            }
           }
         }
 
+        finished.forEach {
+          self.notifyTimerFinished($0)
+        }
+
+        if !finished.isEmpty {
+          let finishiedIds = Set(finished.map { $0.id })
+          items.removeAll { finishiedIds.contains($0.id) }
+          changed = true
+        }
+
         if changed {  // 변화 감지
-          TimerDataManager.shared.timers.onNext(items) // 변경된 데이터 전달. 다른 구독자에게 갱신 요청
+          TimerDataManager.shared.timers.onNext(items)  // 변경된 데이터 전달. 다른 구독자에게 갱신 요청
           TimerDataManager.shared.saveTimers()  // userDefault 저장
         }
       }).disposed(by: disposeBag)
@@ -76,6 +95,7 @@ final class TimerViewController: UIViewController {
     }
   }
 
+  // 내비게이션바 버튼
   private func setupNavigationBar() {
     navigationItem.rightBarButtonItem = UIBarButtonItem(
       systemItem: .add,
@@ -105,6 +125,7 @@ final class TimerViewController: UIViewController {
     navigationController?.navigationBar.scrollEdgeAppearance = appearance
   }
 
+  // 타이머 추가 페이지 전환
   private func presentAddTimerViewController() {
     let addVC = AddTimerViewController()
     let nav = UINavigationController(rootViewController: addVC)
@@ -112,9 +133,36 @@ final class TimerViewController: UIViewController {
     present(nav, animated: true)
   }
 
+  // 타이머 셀의 정렬
   private func timerCellSort(_ a: TimerItem, _ b: TimerItem) -> Bool {
     if a.time == b.time { return a.id.uuidString < b.id.uuidString }
     return a.time < b.time
+  }
+
+  // 권한 요청
+  private func requestNotificationPermission() {
+    UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { granted, err in
+      if let err = err {  // 에러일 때
+        print("\(err)")
+      } else {
+        print("\(granted)")  // 권한 파악
+      }
+    }
+  }
+
+  // 타이머 끝나면 알람
+  private func notifyTimerFinished(_ item: TimerItem) {
+    let content = UNMutableNotificationContent()
+    content.title = "타이머"
+    content.body = item.label
+    content.sound = .defaultRingtone
+    
+    let request = UNNotificationRequest(identifier: item.id.uuidString, content: content, trigger: nil)
+    UNUserNotificationCenter.current().add(request) { err in
+      if let err = err {
+        print("\(err)")
+      }
+    }
   }
 
 }
@@ -136,21 +184,30 @@ extension TimerViewController: UITableViewDataSource {
     let item = timerItems[indexPath.row]
     cell.configureUI(with: item)
 
-    cell.onToggleActive = { [weak self] in // 클로저 설정
+    cell.onToggleActive = { [weak self] in  // 클로저 설정
       guard let self = self else { return }
-      guard var items = try? TimerDataManager.shared.timers.value() else { return } // timers 데이터(배열) 조회
+      guard var items = try? TimerDataManager.shared.timers.value() else { return }  // timers 데이터(배열) 조회
       if let idx = items.firstIndex(where: { $0.id == item.id }) {  // 현재 cell item과 동일한 타이머 인덱스 조회
-        items[idx].isActive.toggle() // 활성화 토글
-        
-        if items[idx].isActive == false { // 타이머 셀이 일시정지될 때
-          items.sort(by: timerCellSort) // 짧은 시간 순 정렬
+        items[idx].isActive.toggle()  // 활성화 토글
+
+        if items[idx].isActive == false {  // 타이머 셀이 일시정지될 때
+          items.sort(by: timerCellSort)  // 짧은 시간 순 정렬
         }
-        
-        TimerDataManager.shared.timers.onNext(items) // 변경된 데이터 전달. 다른 구독자에게 갱신 요청
-        TimerDataManager.shared.saveTimers() // userDefault 저장
+
+        TimerDataManager.shared.timers.onNext(items)  // 변경된 데이터 전달. 다른 구독자에게 갱신 요청
+        TimerDataManager.shared.saveTimers()  // userDefault 저장
       }
     }
     return cell
   }
 }
-// MARK: Button Function
+
+extension TimerViewController: UNUserNotificationCenterDelegate {
+  func userNotificationCenter(
+    _ center: UNUserNotificationCenter,
+    willPresent notification: UNNotification,
+    withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
+  ) {
+    completionHandler([.banner, .sound])
+  }
+}
