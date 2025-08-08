@@ -59,4 +59,12 @@ final class AlarmManager {
     alarms[index].isOn.toggle()
     save()
   }
+
+  func move(from: Int, to: Int) {
+    var list = alarms
+    let item = list.remove(at: from)
+    list.insert(item, at: to)
+    alarms = list
+    save()
+  }
 }
