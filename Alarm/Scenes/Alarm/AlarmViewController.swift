@@ -14,7 +14,6 @@ final class AlarmViewController: UIViewController {
 
   override func viewDidLoad() {
     super.viewDidLoad()
-    view.backgroundColor = .white
 
     AlarmManager.shared.loadSampleData()
 
