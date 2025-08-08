@@ -5,11 +5,11 @@
 //  Created by 노가현 on 8/5/25.
 //
 
-import UIKit
+import RxCocoa
+import RxSwift
 import SnapKit
 import Then
-import RxSwift
-import RxCocoa
+import UIKit
 
 final class StopwatchViewController: UIViewController {
   // MARK: - Properties
@@ -30,20 +30,20 @@ final class StopwatchViewController: UIViewController {
   
   // 컬렉션 뷰
   private lazy var collectionView: UICollectionView = {
-      // 리스트 레이아웃 구성
-      var config = UICollectionLayoutListConfiguration(appearance: .plain)
-      config.backgroundColor = .background
-      // 구분선 inset 0 으로 해서 화면 가운데에 맞게 설정
-      config.itemSeparatorHandler = { _, sectionSeparatorConfiguration in
-          var s = sectionSeparatorConfiguration
-          s.topSeparatorInsets = NSDirectionalEdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0)
-          s.bottomSeparatorInsets = NSDirectionalEdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0)
-          return s
-      }
+    // 리스트 레이아웃 구성
+    var config = UICollectionLayoutListConfiguration(appearance: .plain)
+    config.backgroundColor = .background
+    // 구분선 inset 0 으로 해서 화면 가운데에 맞게 설정
+    config.itemSeparatorHandler = { _, sectionSeparatorConfiguration in
+      var s = sectionSeparatorConfiguration
+      s.topSeparatorInsets = NSDirectionalEdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0)
+      s.bottomSeparatorInsets = NSDirectionalEdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0)
+      return s
+    }
 
-      let layout = UICollectionViewCompositionalLayout.list(using: config)
-      let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
-      return collectionView
+    let layout = UICollectionViewCompositionalLayout.list(using: config)
+    let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+    return collectionView
   }()
 
   // 컬렉션 뷰 데이터 소스

@@ -5,13 +5,13 @@
 //  Created by 김이든 on 8/7/25.
 //
 
-import UIKit
-import RxSwift
 import RxCocoa
+import RxSwift
+import UIKit
 
 class StopwatchCircleView: UIView {
   // MARK: - Properties
-  
+
   // 진행 경로의 전체 배경 원
   private let trackLayer = CAShapeLayer().then {
     $0.fillColor = UIColor.clear.cgColor
@@ -19,6 +19,7 @@ class StopwatchCircleView: UIView {
     $0.strokeStart = 0
     $0.strokeEnd = 1
   }
+
   // 진행상황 그려지는 레이어
   private let progressLayer = CAShapeLayer().then {
     $0.fillColor = UIColor.clear.cgColor
@@ -27,6 +28,7 @@ class StopwatchCircleView: UIView {
     $0.strokeStart = 0
     $0.strokeEnd = 0
   }
+
   // 내부적으로 현재 진행값을 보관하는 프로퍼티
   private var _progress: Float = 0
   // 공통으로 사용하는 선 두께
@@ -75,8 +77,8 @@ class StopwatchCircleView: UIView {
 extension StopwatchCircleView {
   private func renderProgress(_ progress: Float, animated: Bool) {
     // CATransaction은 여러 CALayer 관련 변경 사항을 하나의 애니메이션 트랜젝션으로 묶어줌
-    CATransaction.begin()  //begin으로 트랜잭션 시작
-    defer { CATransaction.commit() } //defer를 사용해 함수 종료 시점에 무조건 commit()으로 트랜직션 종료
+    CATransaction.begin() // begin으로 트랜잭션 시작
+    defer { CATransaction.commit() } // defer를 사용해 함수 종료 시점에 무조건 commit()으로 트랜직션 종료
 
     if !animated {
       CATransaction.setDisableActions(true)
@@ -86,12 +88,12 @@ extension StopwatchCircleView {
 
     progressLayer.strokeEnd = CGFloat(progress)
   }
-  
+
   // 원호 경로(벡터 path)를 생성하여 반환하는 메서드
   private func arcPath(in bounds: CGRect) -> UIBezierPath {
     // 시계 방향 기준
-    let n: CGFloat = 1.5  // 1.5바퀴
-    let r: CGFloat = 2    // 2π = 360도
+    let n: CGFloat = 1.5 // 1.5바퀴
+    let r: CGFloat = 2 // 2π = 360도
 
     let radius = min(bounds.width, bounds.height) * 0.5 - lineWidth * 0.5
 
