@@ -103,21 +103,11 @@ class TimerTableViewCell: UITableViewCell {
   }
 
   private func formattedTime(_ interval: TimeInterval) -> String {
-    let timeInterval = Int(interval)
-    let hours = timeInterval / 3600
-    let minutes = (timeInterval % 3600) / 60
-    let seconds = timeInterval % 60
-
-    if hours == 0 {
-      // 00:00
-      return String(format: "%02d:%02d", minutes, seconds)
-    } else if hours < 10 {
-      // 0:00:00
-      return String(format: "%d:%02d:%02d", hours, minutes, seconds)
-    } else {
-      // 00:00:00
-      return String(format: "%02d:%02d:%02d", hours, minutes, seconds)
-    }
+    let formatter = DateComponentsFormatter()
+    formatter.allowedUnits = interval >= 3600 ? [.hour, .minute, .second] : [.minute, .second]
+    formatter.unitsStyle = .positional
+    formatter.zeroFormattingBehavior = [.pad]
+    return formatter.string(from: interval) ?? "00:00"
   }
 
   @objc private func toggleActive() {
