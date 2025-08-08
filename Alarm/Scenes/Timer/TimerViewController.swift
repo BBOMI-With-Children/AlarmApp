@@ -156,7 +156,7 @@ final class TimerViewController: UIViewController {
     content.title = "타이머"
     content.body = item.label
     content.sound = .defaultRingtone
-    
+
     let request = UNNotificationRequest(identifier: item.id.uuidString, content: content, trigger: nil)
     UNUserNotificationCenter.current().add(request) { err in
       if let err = err {
@@ -164,7 +164,6 @@ final class TimerViewController: UIViewController {
       }
     }
   }
-
 }
 
 // MARK: - UITableView
