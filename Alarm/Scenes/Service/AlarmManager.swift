@@ -6,65 +6,75 @@
 //
 
 import Foundation
+import RxCocoa
+import RxSwift
 
 final class AlarmManager {
   static let shared = AlarmManager()
-  private init() { load() }
 
   private let key = "alarms"
-  private(set) var alarms: [Alarm] = []
+  let alarms = BehaviorRelay<[Alarm]>(value: [])
 
-  // 샘플 데이터
-  func loadSampleData() {
-    alarms = [
-      Alarm(time: "오전 9:00", subtitle: "주중", isOn: false),
-      Alarm(time: "오전 11:00", subtitle: "주중", isOn: false),
-      Alarm(time: "오후 2:00", subtitle: "주중", isOn: false),
-      Alarm(time: "오후 8:00", subtitle: "주중", isOn: false)
+  private init() {
+    load()
+    loadSampleDataIfEmpty()
+  }
+
+  // MARK: - Persistence
+
+  private func load() {
+    guard let data = UserDefaults.standard.data(forKey: key),
+          let decoded = try? JSONDecoder().decode([Alarm].self, from: data) else { return }
+    alarms.accept(decoded)
+  }
+
+  private func save() {
+    guard let data = try? JSONEncoder().encode(alarms.value) else { return }
+    UserDefaults.standard.set(data, forKey: key)
+  }
+
+  func loadSampleDataIfEmpty() {
+    guard alarms.value.isEmpty else { return }
+    let samples: [Alarm] = [
+      .init(time: "오전 9:00", subtitle: "주중", isOn: false),
+      .init(time: "오전 11:00", subtitle: "주중", isOn: false),
+      .init(time: "오후 2:00", subtitle: "주중", isOn: false),
+      .init(time: "오후 8:00", subtitle: "주중", isOn: false),
     ]
+    alarms.accept(samples)
     save()
   }
 
-  // UserDefaults에서 데이터 불러오기
-  func load() {
-    if let data = UserDefaults.standard.data(forKey: key),
-       let decoded = try? JSONDecoder().decode([Alarm].self, from: data)
-    {
-      alarms = decoded
-    }
-  }
+  // MARK: - CRUD
 
-  // UserDefaults에 데이터 저장
-  func save() {
-    if let data = try? JSONEncoder().encode(alarms) {
-      UserDefaults.standard.set(data, forKey: key)
-    }
-  }
-
-  // 알람 추가
   func add(_ alarm: Alarm) {
-    alarms.append(alarm)
+    var list = alarms.value
+    list.append(alarm)
+    alarms.accept(list)
     save()
   }
 
-  // 알람 삭제
   func remove(id: UUID) {
-    alarms.removeAll { $0.id == id }
+    var list = alarms.value
+    list.removeAll { $0.id == id }
+    alarms.accept(list)
     save()
   }
 
-  // 알람 ON/OFF 토글
+  func remove(at index: Int) {
+    var list = alarms.value
+    guard list.indices.contains(index) else { return }
+    list.remove(at: index)
+    alarms.accept(list)
+    save()
+  }
+
   func toggle(id: UUID) {
-    guard let index = alarms.firstIndex(where: { $0.id == id }) else { return }
-    alarms[index].isOn.toggle()
-    save()
-  }
-
-  func move(from: Int, to: Int) {
-    var list = alarms
-    let item = list.remove(at: from)
-    list.insert(item, at: to)
-    alarms = list
-    save()
+    var list = alarms.value
+    if let i = list.firstIndex(where: { $0.id == id }) {
+      list[i].isOn.toggle()
+      alarms.accept(list)
+      save()
+    }
   }
 }
