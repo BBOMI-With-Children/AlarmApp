@@ -92,9 +92,9 @@ final class StopwatchViewController: UIViewController {
   override func viewDidLayoutSubviews() {
     super.viewDidLayoutSubviews()
     
-    for item in [lapResetButton, playPauseButton] {
-      item.layer.cornerRadius = item.bounds.width / 2
-      item.clipsToBounds = true
+    [lapResetButton, playPauseButton].forEach {
+      $0.layer.cornerRadius = $0.bounds.width / 2
+      $0.clipsToBounds = true
     }
   }
 
@@ -105,8 +105,8 @@ final class StopwatchViewController: UIViewController {
     
     navigationController?.setNavigationBarHidden(true, animated: false)
     
-    for item in [timeLabel, vStackView] {
-      view.addSubview(item)
+    [timeLabel, vStackView].forEach {
+      view.addSubview($0)
     }
     
     stopwatchCircleView.snp.makeConstraints {
