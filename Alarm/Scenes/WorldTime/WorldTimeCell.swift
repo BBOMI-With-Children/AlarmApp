@@ -72,6 +72,13 @@ final class WorldTimeCell: UITableViewCell {
     fatalError("init(coder:) has not been implemented")
   }
   
+  override func setEditing(_ editing: Bool, animated: Bool) {
+    super.setEditing(editing, animated: animated)
+    meridiemLabel.isHidden = editing
+    timeLabel.isHidden = editing
+    backgroundColor = UIColor(named: "backgroundColor")
+  }
+  
   // MARK: - Private Methods
   
   private func setupUI() {
