@@ -12,35 +12,21 @@ import Then
 import UIKit
 
 final class WorldTimeViewController: UIViewController {
-  private enum Section {
-    case main
-  }
-  
   // MARK: - Properties
 
   private let backgroundColor = UIColor(named: "backgroundColor")
   private let mainColor = UIColor(named: "mainColor")
-  
-  private lazy var collectionView = UICollectionView(
-    frame: .zero,
-    collectionViewLayout: {
-      var config = UICollectionLayoutListConfiguration(appearance: .insetGrouped)
-      config.headerMode = .none
-      config.showsSeparators = false // 구분선 없음
-      config.backgroundColor = backgroundColor
-      return UICollectionViewCompositionalLayout.list(using: config)
-    }()
-  )
-  
+
+  private let tableView = UITableView()
+
   private let editButton = UIBarButtonItem(title: "편집", style: .plain, target: nil, action: nil)
   private let addButton = UIBarButtonItem(barButtonSystemItem: .add, target: nil, action: nil)
-  
-  private var isEditingMode = false
-  private var items = ["서울", "도쿄", "런던"]
 
-  private lazy var dataSource = makeDataSource()
+  private var isEditingMode = false
+  private let itemsRelay = BehaviorRelay<[String]>(value: ["서울", "도쿄", "런던", "파리", "로마"])
+
   private let disposeBag = DisposeBag()
-  
+
   // MARK: - Lifecycle
 
   override func viewDidLoad() {
@@ -49,97 +35,93 @@ final class WorldTimeViewController: UIViewController {
     configureLayout()
     configureNavigationBar()
     bind()
-    applySnapshot()
-  }
-  
-  override func setEditing(_ editing: Bool, animated: Bool) {
-    super.setEditing(editing, animated: animated)
-    collectionView.isEditing = editing // 콜렉션뷰 편집모드로 변경
   }
 
   // MARK: - Private Methods
 
   private func configureUI() {
+    title = "세계 시계"
+    navigationController?.navigationBar.prefersLargeTitles = true // LargeTitles
+    navigationController?.navigationBar.largeTitleTextAttributes = [
+      .font: UIFont.systemFont(ofSize: 28, weight: .bold)
+    ]
+
     view.backgroundColor = backgroundColor
-    view.addSubview(collectionView)
+    view.addSubview(tableView)
+    tableView.backgroundColor = backgroundColor
+    tableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
   }
-  
+
   private func configureLayout() {
-    collectionView.snp.makeConstraints {
+    tableView.snp.makeConstraints {
       $0.edges.equalTo(view.safeAreaLayoutGuide)
     }
   }
-  
-  // 네비게이션 바
+
+  // MARK: - 네비게이션 바 추가
+
   private func configureNavigationBar() {
     navigationItem.leftBarButtonItem = editButton
     navigationItem.rightBarButtonItem = addButton
     editButton.tintColor = mainColor
     addButton.tintColor = mainColor
   }
-  
-  // bind
+
   private func bind() {
+    // MARK: - 편집 모드
+
     editButton.rx.tap
       .withUnretained(self) // [weak self]처럼 약한 참조 + nil이면 자동으로 이벤트 무시
-      .subscribe(onNext: { owner, _ in
-        owner.isEditingMode.toggle()
-        owner.setEditing(owner.isEditingMode, animated: true)
-        owner.editButton.title = owner.isEditingMode ? "완료" : "편집"
+      .subscribe(onNext: { vc, _ in
+        vc.isEditingMode.toggle()
+        vc.tableView.setEditing(vc.isEditingMode, animated: true)
+        vc.editButton.title = vc.isEditingMode ? "완료" : "편집"
       })
       .disposed(by: disposeBag)
-    
-    addButton.rx.tap
-      .subscribe(onNext: {
-        print("Modal 띄우기 예정")
-      })
-      .disposed(by: disposeBag)
-  }
-  
-  // Diffable DataSource
-  private func makeDataSource() -> UICollectionViewDiffableDataSource<Section, String> {
-    // 셀 등록
-    let cellRegistration = UICollectionView.CellRegistration<UICollectionViewListCell, String> { cell, _, itemIdentifier in
-      var configuration = cell.defaultContentConfiguration()
-      configuration.text = itemIdentifier
-      configuration.textProperties.font = .systemFont(ofSize: 16, weight: .regular)
-      cell.contentConfiguration = configuration
-      
-      // 편집 모드일 때만 보이는 액세서리 (순서 변경, 삭제)
-      cell.accessories = [
-        .reorder(displayed: .whenEditing), // 셀 우측에 "드래그 핸들"을 띄워서 순서 변경 가능 (reorder가 드래그 핸들, 디스플레이에 편집 모드인 경우에만 띄움)
-        .delete(displayed: .whenEditing) // 셀 촤측에 "삭제 버튼"을 띄워서 삭제 가능 (삭제버튼, 외 동일)
-      ]
-    }
-    
-    // 순서 변경 처리
-    var reorderingHandlers = UICollectionViewDiffableDataSource<Section, String>.ReorderingHandlers() // ReorderingHandlers: canReorderItem,didReorder를 설정할 수 있는 구조체
-    reorderingHandlers.canReorderItem = { _ in true } // 드래그 이동 가능하도록 허용. 무조건 true 반환
-    reorderingHandlers.didReorder = { [weak self] transaction in // 셀의 순서를 변경할 때 호출되는 클로저. transaction에는 바뀐 순서 정보가 있음
-      // transaction.difference는 사용자가 셀의 순서를 변경한 내용을 담고 있는 diff
-      // items 배열에 이 difference를 적용(apply)해서, 새로운 순서가 반영된 배열(updatedItems)을 만들어냄
-      guard let self, let updatedItems = items.applying(transaction.difference) else { return }
-      items = updatedItems
-      DispatchQueue.main.async {
-        self.applySnapshot()
+
+    // MARK: - 테이블뷰 아이템 바인딩 (더미 데이터)
+
+    itemsRelay
+      .asDriver(onErrorJustReturn: []) // Driver<[String]>로 변환, 에러 시 빈 배열
+      .drive(tableView.rx.items(cellIdentifier: "cell")) { _, city, cell in // (row, element, cell)
+        cell.textLabel?.text = city
+        cell.selectionStyle = .none
+        cell.backgroundColor = self.backgroundColor
       }
-    }
-    
-    // 데이터 소스? 생성. 셀 재사용 가능하도록
-    let dataSource = UICollectionViewDiffableDataSource<Section, String>(collectionView: collectionView) { collectionView, indexPath, itemIdentifier in
-      collectionView.dequeueConfiguredReusableCell(using: cellRegistration, for: indexPath, item: itemIdentifier)
-    }
-    
-    // 디퍼블 데이터소스에 셀 순서 변경 기능을 연결
-    dataSource.reorderingHandlers = reorderingHandlers
-    return dataSource
-  }
-  
-  // Snapshot
-  private func applySnapshot() {
-    var snapshot = NSDiffableDataSourceSnapshot<Section, String>()
-    snapshot.appendSections([.main])
-    snapshot.appendItems(items) // 더미 items 데이터
-    dataSource.apply(snapshot, animatingDifferences: true)
+      .disposed(by: disposeBag)
+
+    // MARK: - 스와이프 삭제
+
+    tableView.rx.itemDeleted
+      .withUnretained(self)
+      .subscribe(onNext: { vc, indexPath in
+        var newItems = vc.itemsRelay.value
+        newItems.remove(at: indexPath.row)
+        vc.itemsRelay.accept(newItems) // accept는 덮어쓰기 느낌 (교체)
+      })
+      .disposed(by: disposeBag)
+
+    // MARK: - 셀 위치 변경
+
+    tableView.rx.itemMoved
+      .withUnretained(self)
+      .subscribe(onNext: { vc, move in
+        var newItems = vc.itemsRelay.value
+        // sourceIndex: 드래그 시작한 셀의 위치, destinationIndex: 드롭 도착한 셀의 위치
+        let moved = newItems.remove(at: move.sourceIndex.row) // 값을 꺼내면서 배열에서 삭제
+        newItems.insert(moved, at: move.destinationIndex.row)
+        vc.itemsRelay.accept(newItems)
+      })
+      .disposed(by: disposeBag)
+
+    // MARK: - Modal 페이지로 이동
+
+    addButton.rx.tap
+      .withUnretained(self)
+      .subscribe(onNext: { _, _ in
+        print("Tap")
+        // TODO: Modal 페이지로 이동 구현
+      })
+      .disposed(by: disposeBag)
   }
 }
