@@ -49,7 +49,7 @@ final class WorldTimeViewController: UIViewController {
     view.backgroundColor = backgroundColor
     view.addSubview(tableView)
     tableView.backgroundColor = backgroundColor
-    tableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
+    tableView.register(UITableViewCell.self, forCellReuseIdentifier: WorldTimeCell.id)
   }
 
   private func setupLayout() {
@@ -83,7 +83,7 @@ final class WorldTimeViewController: UIViewController {
 
     itemsRelay
       .asDriver(onErrorJustReturn: []) // Driver<[String]>로 변환, 에러 시 빈 배열
-      .drive(tableView.rx.items(cellIdentifier: "cell")) { _, city, cell in // (row, element, cell)
+      .drive(tableView.rx.items(cellIdentifier: WorldTimeCell.id)) { _, city, cell in // (row, element, cell)
         cell.textLabel?.text = city
         cell.selectionStyle = .none
         cell.backgroundColor = self.backgroundColor
