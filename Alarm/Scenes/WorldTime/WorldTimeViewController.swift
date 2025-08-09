@@ -12,29 +12,34 @@ import Then
 import UIKit
 
 final class WorldTimeViewController: UIViewController {
-  
   private enum Section {
     case main
   }
   
   // MARK: - Properties
-  private var isEditingMode = false
-  private var items = ["서울", "도쿄", "런던"]
-  private let editButton = UIBarButtonItem(title: "편집", style: .plain, target: nil, action: nil)
-  private let addButton = UIBarButtonItem(barButtonSystemItem: .add, target: nil, action: nil)
-  private lazy var dataSource = makeDataSource()
-  private let disposeBag = DisposeBag()
+
+  private let backgroundColor = UIColor(named: "backgroundColor")
+  private let mainColor = UIColor(named: "mainColor")
   
-  private let collectionView = UICollectionView(
+  private lazy var collectionView = UICollectionView(
     frame: .zero,
     collectionViewLayout: {
       var config = UICollectionLayoutListConfiguration(appearance: .insetGrouped)
       config.headerMode = .none
       config.showsSeparators = false // 구분선 없음
-      config.backgroundColor = .systemBackground
+      config.backgroundColor = backgroundColor
       return UICollectionViewCompositionalLayout.list(using: config)
     }()
   )
+  
+  private let editButton = UIBarButtonItem(title: "편집", style: .plain, target: nil, action: nil)
+  private let addButton = UIBarButtonItem(barButtonSystemItem: .add, target: nil, action: nil)
+  
+  private var isEditingMode = false
+  private var items = ["서울", "도쿄", "런던"]
+
+  private lazy var dataSource = makeDataSource()
+  private let disposeBag = DisposeBag()
   
   // MARK: - Lifecycle
 
@@ -55,6 +60,7 @@ final class WorldTimeViewController: UIViewController {
   // MARK: - Private Methods
 
   private func configureUI() {
+    view.backgroundColor = backgroundColor
     view.addSubview(collectionView)
   }
   
@@ -66,9 +72,10 @@ final class WorldTimeViewController: UIViewController {
   
   // 네비게이션 바
   private func configureNavigationBar() {
-    title = "세계 시계"
     navigationItem.leftBarButtonItem = editButton
     navigationItem.rightBarButtonItem = addButton
+    editButton.tintColor = mainColor
+    addButton.tintColor = mainColor
   }
   
   // bind
