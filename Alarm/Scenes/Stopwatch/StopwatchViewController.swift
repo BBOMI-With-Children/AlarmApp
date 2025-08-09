@@ -13,21 +13,24 @@ import UIKit
 
 final class StopwatchViewController: UIViewController {
   // MARK: - Properties
-  
+
   // 더미데이터
   private(set) var items = (1 ... 20).map { "랩 \($0)" }
-  
+
+  private let disposeBag = DisposeBag()
+  private let viewModel = StopwatchViewModel()
+
   // 원형 뷰
   private let stopwatchCircleView = StopwatchCircleView()
-  
+
   // 시간 레이블
   private let timeLabel = UILabel().then {
     $0.text = "00:00:00"
-    $0.font = .systemFont(ofSize: 36, weight: .bold)
+    $0.font = .monospacedDigitSystemFont(ofSize: 36, weight: .bold)
     $0.textColor = .white
     $0.textAlignment = .center
   }
-  
+
   // 컬렉션 뷰
   private lazy var collectionView: UICollectionView = {
     // 리스트 레이아웃 구성
@@ -48,15 +51,16 @@ final class StopwatchViewController: UIViewController {
 
   // 컬렉션 뷰 데이터 소스
   lazy var dataSource = makeDataSource(collectionView)
-  
+
   // 랩,재설정 버튼
   private let lapResetButton = UIButton().then {
     let image = UIImage(systemName: "arrow.clockwise")
     $0.setImage(image, for: .normal)
     $0.tintColor = .white
     $0.backgroundColor = .modal
+    $0.isEnabled = false
   }
-  
+
   // 시작, 중단 버튼
   private let playPauseButton = UIButton().then {
     let image = UIImage(systemName: "play.fill")
@@ -64,14 +68,14 @@ final class StopwatchViewController: UIViewController {
     $0.tintColor = .background
     $0.backgroundColor = .main
   }
-  
+
   // 버튼 담는 horizontal 스택뷰
   private lazy var hStackView = UIStackView(arrangedSubviews: [lapResetButton, playPauseButton]).then {
     $0.axis = .horizontal
     $0.alignment = .center
     $0.distribution = .equalSpacing
   }
-  
+
   // 원형(시간), 컬렉션뷰, horizontal버튼스택뷰 담는 vertical 스택뷰
   private lazy var vStackView = UIStackView(arrangedSubviews: [stopwatchCircleView, hStackView, collectionView]).then {
     $0.axis = .vertical
@@ -79,19 +83,20 @@ final class StopwatchViewController: UIViewController {
     $0.spacing = 16
     $0.distribution = .equalSpacing
   }
-  
+
   // MARK: - Lifecycle
 
   override func viewDidLoad() {
     super.viewDidLoad()
     configureUI()
     collectionViewSetup()
+    bindViewModel()
   }
-  
+
   // 버튼 cornerRadius 동적으로 관리
   override func viewDidLayoutSubviews() {
     super.viewDidLayoutSubviews()
-    
+
     [lapResetButton, playPauseButton].forEach {
       $0.layer.cornerRadius = $0.bounds.width / 2
       $0.clipsToBounds = true
@@ -102,51 +107,54 @@ final class StopwatchViewController: UIViewController {
 
   private func configureUI() {
     view.backgroundColor = .background
-    
+
     navigationController?.setNavigationBarHidden(true, animated: false)
-    
+
     [timeLabel, vStackView].forEach {
       view.addSubview($0)
     }
-    
+
     stopwatchCircleView.snp.makeConstraints {
-      $0.size.equalTo(240)
+      $0.size.equalTo(300)
     }
-    
+
     timeLabel.snp.makeConstraints {
-      $0.center.equalTo(stopwatchCircleView)
+      $0.centerY.equalTo(stopwatchCircleView)
+      $0.horizontalEdges.equalTo(stopwatchCircleView).inset(20)
     }
-    
+
     lapResetButton.snp.makeConstraints {
       $0.size.equalTo(74)
     }
-    
+
     playPauseButton.snp.makeConstraints {
       $0.size.equalTo(74)
     }
-    
+
     collectionView.snp.makeConstraints {
       $0.height.equalTo(240)
       $0.directionalHorizontalEdges.equalToSuperview()
     }
-    
+
     hStackView.snp.makeConstraints {
       $0.directionalHorizontalEdges.equalTo(vStackView)
     }
-    
+
     vStackView.snp.makeConstraints {
       $0.top.equalTo(view.safeAreaLayoutGuide).inset(32)
       $0.directionalHorizontalEdges.equalToSuperview().inset(20)
       $0.bottom.equalTo(view.safeAreaLayoutGuide)
     }
-    
+
     // 임시
-    stopwatchCircleView.setProgress(0.7, animated: true)
+    stopwatchCircleView.setProgress(1, animated: true)
     timeLabel.text = "00:12:34"
   }
-  
-  // MARK: - CollectionView Setup
-  
+}
+
+// MARK: - CollectionView Setup
+
+extension StopwatchViewController {
   // 컬렉션뷰에 데이터를 적용하는 함수
   private func collectionViewSetup() {
     // 1. DiffableDataSource에서 사용할 스냅샷 생성
@@ -169,7 +177,7 @@ final class StopwatchViewController: UIViewController {
       var configuration = cell.defaultContentConfiguration()
       configuration.text = text // 셀의 주 텍스트
       cell.contentConfiguration = configuration
-          
+
       // 셀의 배경 구성
       var background = UIBackgroundConfiguration.listPlainCell()
       background.backgroundColor = .background
@@ -192,5 +200,39 @@ final class StopwatchViewController: UIViewController {
 
     // 3. 완성된 데이터소스 반환
     return dataSource
+  }
+}
+
+// MARK: - Rx Bind
+
+extension StopwatchViewController {
+  private func bindViewModel() {
+    // 버튼 탭 → 토글 실행
+    playPauseButton.rx.tap
+      .bind { [weak self] in
+        self?.viewModel.togglePlayPause()
+      }
+      .disposed(by: disposeBag)
+
+    // isRunning → 버튼 이미지 변경
+    viewModel.isRunning
+      .map { $0 ? UIImage(systemName: "pause.fill") : UIImage(systemName: "play.fill") } // .map으로 Bool -> UIImage?로 변환된 Obsevable
+      .bind(to: playPauseButton.rx.image())
+      .disposed(by: disposeBag)
+
+    // timePassed → 밀리세컨드 포맷으로 변환 후 표시
+    viewModel.timePassed
+      .map { time -> String in
+          let totalMilliseconds = Int(time * 100)
+        
+          let totalSeconds = totalMilliseconds / 100
+          let minutes = totalSeconds / 60
+          let seconds = totalSeconds % 60
+          let milliseconds = totalMilliseconds % 100
+        
+          return String(format: "%02d:%02d:%02d", minutes, seconds, milliseconds)
+      }
+      .bind(to: timeLabel.rx.text)
+      .disposed(by: disposeBag)
   }
 }
