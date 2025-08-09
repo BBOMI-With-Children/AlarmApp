@@ -18,7 +18,11 @@ final class WorldTimeViewController: UIViewController {
   private let mainColor = UIColor(named: "mainColor")
 
   private let viewModel = WorldTimeViewModel()
-  private let tableView = UITableView()
+  private lazy var tableView = UITableView().then {
+    $0.separatorStyle = .none
+    $0.register(WorldTimeCell.self, forCellReuseIdentifier: WorldTimeCell.id)
+    $0.backgroundColor = backgroundColor
+  }
 
   private let editButton = UIBarButtonItem(title: "편집", style: .plain, target: nil, action: nil)
   private let addButton = UIBarButtonItem(barButtonSystemItem: .add, target: nil, action: nil)
@@ -49,8 +53,6 @@ final class WorldTimeViewController: UIViewController {
 
     view.backgroundColor = backgroundColor
     view.addSubview(tableView)
-    tableView.backgroundColor = backgroundColor
-    tableView.register(WorldTimeCell.self, forCellReuseIdentifier: WorldTimeCell.id)
   }
 
   private func setupLayout() {
