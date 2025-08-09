@@ -223,14 +223,14 @@ extension StopwatchViewController {
     // timePassed → 밀리세컨드 포맷으로 변환 후 표시
     viewModel.timePassed
       .map { time -> String in
-          let totalMilliseconds = Int(time * 100)
-        
-          let totalSeconds = totalMilliseconds / 100
-          let minutes = totalSeconds / 60
-          let seconds = totalSeconds % 60
-          let milliseconds = totalMilliseconds % 100
-        
-          return String(format: "%02d:%02d:%02d", minutes, seconds, milliseconds)
+        let totalMilliseconds = Int(time * 100)
+
+        let totalSeconds = totalMilliseconds / 100
+        let minutes = totalSeconds / 60
+        let seconds = totalSeconds % 60
+        let milliseconds = totalMilliseconds % 100
+
+        return String(format: "%02d:%02d:%02d", minutes, seconds, milliseconds)
       }
       .bind(to: timeLabel.rx.text)
       .disposed(by: disposeBag)
