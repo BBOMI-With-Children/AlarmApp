@@ -38,12 +38,12 @@ final class WorldTimeCell: UITableViewCell {
   }
 
   private let meridiemLabel = UILabel().then { // 오전/오후
-    $0.font = .systemFont(ofSize: 20, weight: .medium)
+    $0.font = .systemFont(ofSize: 20, weight: .light)
     $0.textColor = .label
   }
 
   private let timeLabel = UILabel().then { // 시간
-    $0.font = .systemFont(ofSize: 35, weight: .medium)
+    $0.font = .systemFont(ofSize: 40, weight: .light)
     $0.textColor = .label
   }
   
@@ -51,20 +51,12 @@ final class WorldTimeCell: UITableViewCell {
     $0.axis = .vertical
     $0.alignment = .leading
     $0.spacing = 4
-    $0.isLayoutMarginsRelativeArrangement = true
-    $0.layoutMargins = UIEdgeInsets(top: 20, left: 20, bottom: 20, right: 20)
   }
 
-  private let rightStackView = UIStackView().then { // meridiemLabel + timeLabel
+  private let contentStackView = UIStackView().then {
     $0.axis = .horizontal
-    $0.alignment = .center
-    $0.spacing = 2
     $0.isLayoutMarginsRelativeArrangement = true
     $0.layoutMargins = UIEdgeInsets(top: 20, left: 20, bottom: 20, right: 20)
-  }
-
-  private let contentStackView = UIStackView().then { // leftStackView + rightStackView
-    $0.axis = .horizontal
   }
   
   // MARK: - Lifecycle
@@ -88,20 +80,29 @@ final class WorldTimeCell: UITableViewCell {
     timeDifferenceLabel.textColor = UIColor(named: "mainColor")
     
     contentView.addSubview(containerView)
-    containerView.addSubview(contentStackView)
-    [leftStackView, rightStackView].forEach { contentStackView.addArrangedSubview($0) }
+    [contentStackView, meridiemLabel].forEach { containerView.addSubview($0) }
+    [leftStackView, timeLabel].forEach { contentStackView.addArrangedSubview($0) }
     [cityLabel, timeDifferenceLabel].forEach { leftStackView.addArrangedSubview($0) }
-    [meridiemLabel, timeLabel].forEach { rightStackView.addArrangedSubview($0) }
   }
   
   private func setupLayout() {
     containerView.snp.makeConstraints {
-      $0.top.bottom.equalToSuperview().inset(3)
+      $0.top.bottom.equalToSuperview().inset(4)
       $0.leading.trailing.equalToSuperview().inset(12)
     }
     
     contentStackView.snp.makeConstraints {
       $0.directionalEdges.equalToSuperview()
+    }
+    
+    meridiemLabel.snp.makeConstraints {
+      $0.trailing.equalTo(timeLabel.snp.leading).offset(-4)
+      $0.lastBaseline.equalTo(timeLabel.snp.lastBaseline)
+    }
+    
+    timeLabel.snp.makeConstraints {
+      $0.trailing.equalToSuperview()
+      $0.centerY.equalToSuperview()
     }
   }
   
