@@ -31,15 +31,15 @@ final class WorldTimeViewController: UIViewController {
 
   override func viewDidLoad() {
     super.viewDidLoad()
-    configureUI()
-    configureLayout()
-    configureNavigationBar()
+    setupUI()
+    setupLayout()
+    setupNavigationBar()
     bind()
   }
 
   // MARK: - Private Methods
 
-  private func configureUI() {
+  private func setupUI() {
     title = "세계 시계"
     navigationController?.navigationBar.prefersLargeTitles = true // LargeTitles
     navigationController?.navigationBar.largeTitleTextAttributes = [
@@ -52,7 +52,7 @@ final class WorldTimeViewController: UIViewController {
     tableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
   }
 
-  private func configureLayout() {
+  private func setupLayout() {
     tableView.snp.makeConstraints {
       $0.edges.equalTo(view.safeAreaLayoutGuide)
     }
@@ -60,7 +60,7 @@ final class WorldTimeViewController: UIViewController {
 
   // MARK: - 네비게이션 바 추가
 
-  private func configureNavigationBar() {
+  private func setupNavigationBar() {
     navigationItem.leftBarButtonItem = editButton
     navigationItem.rightBarButtonItem = addButton
     editButton.tintColor = mainColor
