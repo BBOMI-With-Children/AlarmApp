@@ -17,6 +17,7 @@ final class WorldTimeViewController: UIViewController {
   private let backgroundColor = UIColor(named: "backgroundColor")
   private let mainColor = UIColor(named: "mainColor")
 
+  private let viewModel = WorldTimeViewModel()
   private let tableView = UITableView()
 
   private let editButton = UIBarButtonItem(title: "편집", style: .plain, target: nil, action: nil)
@@ -49,7 +50,7 @@ final class WorldTimeViewController: UIViewController {
     view.backgroundColor = backgroundColor
     view.addSubview(tableView)
     tableView.backgroundColor = backgroundColor
-    tableView.register(UITableViewCell.self, forCellReuseIdentifier: WorldTimeCell.id)
+    tableView.register(WorldTimeCell.self, forCellReuseIdentifier: WorldTimeCell.id)
   }
 
   private func setupLayout() {
@@ -79,14 +80,11 @@ final class WorldTimeViewController: UIViewController {
       })
       .disposed(by: disposeBag)
 
-    // MARK: - 테이블뷰 아이템 바인딩 (더미 데이터)
+    // MARK: - cell에 데이터 바인딩
 
-    itemsRelay
-      .asDriver(onErrorJustReturn: []) // Driver<[String]>로 변환, 에러 시 빈 배열
-      .drive(tableView.rx.items(cellIdentifier: WorldTimeCell.id)) { _, city, cell in // (row, element, cell)
-        cell.textLabel?.text = city
-        cell.selectionStyle = .none
-        cell.backgroundColor = self.backgroundColor
+    viewModel.timesRelay
+      .bind(to: tableView.rx.items(cellIdentifier: WorldTimeCell.id, cellType: WorldTimeCell.self)) { _, model, cell in
+        cell.configure(model)
       }
       .disposed(by: disposeBag)
 
