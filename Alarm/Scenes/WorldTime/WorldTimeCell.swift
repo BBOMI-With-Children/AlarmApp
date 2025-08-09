@@ -17,6 +17,7 @@ final class WorldTimeCell: UITableViewCell {
   private let containerView = UIView().then {
     $0.layer.cornerRadius = 16
     $0.layer.masksToBounds = true
+    $0.backgroundColor = .section
   }
   /*
    ┌────────────────────────────────────┐
@@ -46,11 +47,15 @@ final class WorldTimeCell: UITableViewCell {
   
   private let leftStackView = UIStackView().then {       // cityLabel + timeDifferenceLabel
     $0.axis = .vertical
-    $0.spacing = 8
+    $0.alignment = .leading
+    $0.distribution = .fillEqually
+    $0.spacing = 4
   }
   private let rightStackView = UIStackView().then {      // meridiemLabel + timeLabel
     $0.axis = .horizontal
-    $0.spacing = 8
+    $0.alignment = .center
+    $0.distribution = .fill
+    $0.spacing = 2
   }
   private let contentStackView = UIStackView().then {    // leftStackView + rightStackView
     $0.axis = .horizontal
@@ -72,17 +77,19 @@ final class WorldTimeCell: UITableViewCell {
   // MARK: - Private Methods
   
   private func setupUI() {
-    timeDifferenceLabel.tintColor = UIColor(named: "mainColor")
+    timeDifferenceLabel.textColor = UIColor(named: "mainColor")
     
     contentView.addSubview(containerView)
     containerView.addSubview(contentStackView)
     [leftStackView, rightStackView].forEach { contentStackView.addArrangedSubview($0) }
     [cityLabel, timeDifferenceLabel].forEach { leftStackView.addArrangedSubview($0) }
     [meridiemLabel, timeLabel].forEach { rightStackView.addArrangedSubview($0) }
-    
   }
   
   private func setupLayout() {
-
+    containerView.snp.makeConstraints {
+      $0.top.bottom.equalToSuperview()
+      $0.leading.trailing.equalToSuperview().inset(20)
+    }
   }
 }
