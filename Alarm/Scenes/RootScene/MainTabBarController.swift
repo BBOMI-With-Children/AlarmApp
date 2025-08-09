@@ -22,7 +22,7 @@ final class MainTabBarController: UITabBarController {
 
   private func configureTabBar() {
     // 뷰 컨트롤러, 탭 아이템
-    let worldVC = WorldViewController()
+    let worldVC = WorldTimeViewController()
     worldVC.tabBarItem = UITabBarItem(title: "세계 시계", image: UIImage(systemName: "globe"), tag: 0)
 
     let alarmVC = AlarmViewController()
