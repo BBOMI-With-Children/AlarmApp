@@ -71,6 +71,7 @@ final class WorldTimeViewController: UIViewController {
   }
 
   private func bind() {
+    tableView.rx.setDelegate(self).disposed(by: disposeBag) // delegate
     // MARK: - 편집 모드
 
     editButton.rx.tap
@@ -91,7 +92,7 @@ final class WorldTimeViewController: UIViewController {
       .disposed(by: disposeBag)
 
     // MARK: - 스와이프 삭제
-
+    // TODO: 삭제 데이터가 다른곳으로 가야함
     tableView.rx.itemDeleted
       .withUnretained(self)
       .subscribe(onNext: { vc, indexPath in
@@ -123,5 +124,11 @@ final class WorldTimeViewController: UIViewController {
         // TODO: Modal 페이지로 이동 구현
       })
       .disposed(by: disposeBag)
+  }
+}
+
+extension WorldTimeViewController: UITableViewDelegate {
+  func tableView(_ tableView: UITableView, titleForDeleteConfirmationButtonForRowAt indexPath: IndexPath) -> String? {
+    "삭제"
   }
 }
