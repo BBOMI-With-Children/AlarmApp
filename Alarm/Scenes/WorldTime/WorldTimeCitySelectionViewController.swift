@@ -42,6 +42,10 @@ final class WorldTimeCitySelectionViewController: UIViewController {
     )
   }
   
+  private lazy var tableView = UITableView().then {
+    $0.backgroundColor = backgroundColor
+  }
+  
   // MARK: - Lifecycle
 
   override func viewDidLoad() {
@@ -55,7 +59,7 @@ final class WorldTimeCitySelectionViewController: UIViewController {
 
   private func setupUI() {
     view.backgroundColor = backgroundColor
-    [titleLabel, searchBar].forEach { view.addSubview($0) }
+    [titleLabel, searchBar, tableView].forEach { view.addSubview($0) }
     
     // searchBar에 있는 기본 cancel 버튼을 KVC 방식으로 찾아와서 커스텀
     if let cancelButton = searchBar.value(forKey: "cancelButton") as? UIButton {
@@ -75,6 +79,12 @@ final class WorldTimeCitySelectionViewController: UIViewController {
     searchBar.snp.makeConstraints {
       $0.top.equalTo(titleLabel.snp.bottom).offset(4)
       $0.leading.trailing.equalTo(view.safeAreaLayoutGuide).inset(8)
+    }
+    
+    tableView.snp.makeConstraints {
+      $0.top.equalTo(searchBar.snp.bottom)
+      $0.leading.trailing.equalTo(view.safeAreaLayoutGuide).inset(8)
+      $0.bottom.equalTo(view.safeAreaLayoutGuide)
     }
   }
   
