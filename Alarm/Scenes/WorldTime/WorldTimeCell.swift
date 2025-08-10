@@ -79,7 +79,7 @@ final class WorldTimeCell: UITableViewCell {
     backgroundColor = UIColor(named: "backgroundColor")
   }
   
-  // MARK: - Private Methods
+  // MARK: - setupUI
   
   private func setupUI() {
     contentView.backgroundColor = UIColor(named: "backgroundColor")
@@ -92,6 +92,8 @@ final class WorldTimeCell: UITableViewCell {
     [cityLabel, timeDifferenceLabel].forEach { leftStackView.addArrangedSubview($0) }
   }
   
+  // MARK: - setupLayout
+
   private func setupLayout() {
     containerView.snp.makeConstraints {
       $0.top.bottom.equalToSuperview().inset(4)

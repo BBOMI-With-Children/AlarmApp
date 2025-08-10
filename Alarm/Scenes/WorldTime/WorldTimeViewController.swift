@@ -18,7 +18,7 @@ final class WorldTimeViewController: UIViewController {
   private let mainColor = UIColor(named: "mainColor")
 
   private let viewModel = WorldTimeViewModel()
-  
+
   private lazy var tableView = UITableView().then {
     $0.separatorStyle = .none
     $0.register(WorldTimeCell.self, forCellReuseIdentifier: WorldTimeCell.id)
@@ -42,7 +42,7 @@ final class WorldTimeViewController: UIViewController {
     bind()
   }
 
-  // MARK: - Private Methods
+  // MARK: - setupUI
 
   private func setupUI() {
     title = "세계 시계"
@@ -54,6 +54,8 @@ final class WorldTimeViewController: UIViewController {
     view.backgroundColor = backgroundColor
     view.addSubview(tableView)
   }
+
+  // MARK: - setupLayout
 
   private func setupLayout() {
     tableView.snp.makeConstraints {
