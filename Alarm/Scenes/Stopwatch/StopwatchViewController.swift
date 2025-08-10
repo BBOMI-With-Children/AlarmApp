@@ -220,6 +220,12 @@ extension StopwatchViewController {
       .bind(to: playPauseButton.rx.image())
       .disposed(by: disposeBag)
 
+    // isRunning → 재설정 버튼 이미지 변경
+    viewModel.isRunning
+      .map { $0 ? UIImage(systemName: "stopwatch.fill") : UIImage(systemName: "trash.fill") }
+      .bind(to: lapResetButton.rx.image())
+      .disposed(by: disposeBag)
+
     // timePassed → 밀리세컨드 포맷으로 변환 후 표시
     viewModel.timePassed
       .map { time -> String in
@@ -233,6 +239,26 @@ extension StopwatchViewController {
         return String(format: "%02d:%02d:%02d", minutes, seconds, milliseconds)
       }
       .bind(to: timeLabel.rx.text)
+      .disposed(by: disposeBag)
+
+    // 랩,재설정 버튼 활성화/비활성화
+    viewModel.timePassed
+      .map { $0 > 0 } // Double → Bool 변환
+      .bind(to: lapResetButton.rx.isEnabled) // 버튼 활성/비활성 바인딩
+      .disposed(by: disposeBag)
+
+    // 랩타임 기록 및 재설정
+    lapResetButton.rx.tap
+      .withLatestFrom(viewModel.isRunning) // 버튼 탭 시 현재 상태 가져오기
+      .bind { [weak self] isRunning in
+        if isRunning {
+          // 실행 중 → 랩타임 기록
+          self?.viewModel.recordLap()
+        } else {
+          // 정지 상태 → 시간 리셋
+          self?.viewModel.resetTimer()
+        }
+      }
       .disposed(by: disposeBag)
   }
 }

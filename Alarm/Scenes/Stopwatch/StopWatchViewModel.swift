@@ -62,4 +62,16 @@ final class StopwatchViewModel {
     timerDisposable = nil
     startDate = nil // 시작 시각 초기화
   }
+
+  // 타이머 초기화
+  func resetTimer() {
+    stopTimer()
+    totalTime = 0
+    timePassed.accept(0)
+  }
+
+  // 랩 타임 기록 임시
+  func recordLap() {
+    print("laptime recorded")
+  }
 }
