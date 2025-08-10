@@ -14,9 +14,6 @@ import UIKit
 final class StopwatchViewController: UIViewController {
   // MARK: - Properties
 
-  // 더미데이터
-  private(set) var items = (1 ... 20).map { "랩 \($0)" }
-
   private let disposeBag = DisposeBag()
   private let viewModel = StopwatchViewModel()
 
@@ -25,7 +22,6 @@ final class StopwatchViewController: UIViewController {
 
   // 시간 레이블
   private let timeLabel = UILabel().then {
-    $0.text = "00:00:00"
     $0.font = .monospacedDigitSystemFont(ofSize: 36, weight: .bold)
     $0.textColor = .white
     $0.textAlignment = .center
@@ -54,17 +50,12 @@ final class StopwatchViewController: UIViewController {
 
   // 랩,재설정 버튼
   private let lapResetButton = UIButton().then {
-    let image = UIImage(systemName: "arrow.clockwise")
-    $0.setImage(image, for: .normal)
     $0.tintColor = .white
     $0.backgroundColor = .modal
-    $0.isEnabled = false
   }
 
   // 시작, 중단 버튼
   private let playPauseButton = UIButton().then {
-    let image = UIImage(systemName: "play.fill")
-    $0.setImage(image, for: .normal)
     $0.tintColor = .background
     $0.backgroundColor = .main
   }
@@ -89,7 +80,6 @@ final class StopwatchViewController: UIViewController {
   override func viewDidLoad() {
     super.viewDidLoad()
     configureUI()
-    collectionViewSetup()
     bindViewModel()
   }
 
@@ -148,7 +138,6 @@ final class StopwatchViewController: UIViewController {
 
     // 임시
     stopwatchCircleView.setProgress(1, animated: true)
-    timeLabel.text = "00:12:34"
   }
 }
 
@@ -156,27 +145,49 @@ final class StopwatchViewController: UIViewController {
 
 extension StopwatchViewController {
   // 컬렉션뷰에 데이터를 적용하는 함수
-  private func collectionViewSetup() {
+  private func applySnapshot(_ laps: [LapTime]) {
     // 1. DiffableDataSource에서 사용할 스냅샷 생성
     //    제네릭: <SectionIdentifierType, ItemIdentifierType>
-    //    여기서는 섹션을 Int로, 아이템을 String으로 식별
-    var snapshot = NSDiffableDataSourceSnapshot<Int, String>()
+    //    여기서는 섹션을 Int로, 아이템을 LapTime으로 식별
+    var snapshot = NSDiffableDataSourceSnapshot<Int, LapTime>()
     // 2. 섹션 추가 (여기서는 단일 섹션 0번)
     snapshot.appendSections([0])
-    // 3. 아이템을 섹션에 추가 (거꾸로 순서로 표시하기 위해 reversed() 사용)
-    snapshot.appendItems(items.reversed(), toSection: 0)
+    // 3. 아이템을 섹션에 추가
+    snapshot.appendItems(laps, toSection: 0)
     // 4. 스냅샷을 데이터소스에 적용 → 화면 갱신
-    dataSource.apply(snapshot)
+    dataSource.apply(snapshot, animatingDifferences: true)
   }
 
   // DiffableDataSource를 생성하는 함수
-  private func makeDataSource(_ collectionView: UICollectionView) -> UICollectionViewDiffableDataSource<Int, String> {
+  private func makeDataSource(_ collectionView: UICollectionView) -> UICollectionViewDiffableDataSource<Int, LapTime> {
     // 1. 셀 등록(CellRegistration)
-    let cellRegistration = UICollectionView.CellRegistration<UICollectionViewListCell, String> { cell, _, text in
-      // 셀의 기본 콘텐츠 구성 (텍스트, 이미지, 보조 텍스트 등)
-      var configuration = cell.defaultContentConfiguration()
-      configuration.text = text // 셀의 주 텍스트
-      cell.contentConfiguration = configuration
+    let cellRegistration = UICollectionView.CellRegistration<UICollectionViewListCell, LapTime> { [weak self] cell, _, lap in
+      // 셀의 콘텐츠 구성
+      cell.contentView.subviews.forEach { $0.removeFromSuperview() } // UI 초기화
+
+      let lapNumberLabel = UILabel().then {
+        $0.text = "랩 \(lap.number)"
+        $0.font = .systemFont(ofSize: 16, weight: .medium)
+      }
+
+      let lapTimeLabel = UILabel().then {
+        $0.text = self?.viewModel.formatTime(lap.time)
+        $0.font = .monospacedDigitSystemFont(ofSize: 16, weight: .regular)
+        $0.textAlignment = .right
+      }
+
+      cell.contentView.addSubview(lapNumberLabel)
+      cell.contentView.addSubview(lapTimeLabel)
+
+      lapNumberLabel.snp.makeConstraints {
+        $0.leading.equalToSuperview().offset(16)
+        $0.centerY.equalToSuperview()
+      }
+
+      lapTimeLabel.snp.makeConstraints {
+        $0.trailing.equalToSuperview().inset(16)
+        $0.centerY.equalToSuperview()
+      }
 
       // 셀의 배경 구성
       var background = UIBackgroundConfiguration.listPlainCell()
@@ -187,14 +198,14 @@ extension StopwatchViewController {
     // 2. DiffableDataSource 생성
     //    제네릭: <SectionIdentifierType, ItemIdentifierType>
     //    셀을 어떻게 만들어서 반환할지 cellProvider 클로저로 정의
-    let dataSource = UICollectionViewDiffableDataSource<Int, String>(
+    let dataSource = UICollectionViewDiffableDataSource<Int, LapTime>(
       collectionView: collectionView
-    ) { collectionView, indexPath, text in
+    ) { collectionView, indexPath, lap in
       // cellRegistration을 사용해 셀 dequeue + 구성
       collectionView.dequeueConfiguredReusableCell(
         using: cellRegistration,
         for: indexPath,
-        item: text
+        item: lap
       )
     }
 
@@ -258,6 +269,14 @@ extension StopwatchViewController {
           // 정지 상태 → 시간 리셋
           self?.viewModel.resetTimer()
         }
+      }
+      .disposed(by: disposeBag)
+
+    // CollectionView 갱신
+    viewModel.laps
+      .observe(on: MainScheduler.instance)
+      .bind { [weak self] laps in
+        self?.applySnapshot(laps)
       }
       .disposed(by: disposeBag)
   }
