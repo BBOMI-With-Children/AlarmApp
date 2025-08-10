@@ -5,12 +5,16 @@
 //  Created by 서광용 on 8/10/25.
 // DataSource로 구현.  (데이터 변화도 검색말고 없고, 구현 위주라 전통 DataSource가 적합할거라 생각)
 
+import RxCocoa
+import RxSwift
 import SnapKit
 import Then
 import UIKit
 
 final class WorldTimeCitySelectionViewController: UIViewController {
   // MARK: - Properties
+  
+  private let disposeBag = DisposeBag()
   
   private let backgroundColor = UIColor(named: "backgroundColor")
   private let mainColor = UIColor(named: "mainColor")
@@ -44,6 +48,7 @@ final class WorldTimeCitySelectionViewController: UIViewController {
     super.viewDidLoad()
     setupUI()
     setupLayout()
+    bind()
   }
   
   // MARK: - setupUI
@@ -69,7 +74,15 @@ final class WorldTimeCitySelectionViewController: UIViewController {
     
     searchBar.snp.makeConstraints {
       $0.top.equalTo(titleLabel.snp.bottom).offset(4)
-      $0.leading.trailing.equalTo(view.safeAreaLayoutGuide).inset(12)
+      $0.leading.trailing.equalTo(view.safeAreaLayoutGuide).inset(8)
     }
+  }
+  
+  private func bind() {
+    searchBar.rx.cancelButtonClicked
+      .subscribe(with: self) { vc, _ in
+        vc.dismiss(animated: true)
+      }
+      .disposed(by: disposeBag)
   }
 }

@@ -78,12 +78,11 @@ final class WorldTimeViewController: UIViewController {
     // MARK: - 편집 모드
 
     editButton.rx.tap
-      .withUnretained(self) // [weak self]처럼 약한 참조 + nil이면 자동으로 이벤트 무시
-      .subscribe(onNext: { vc, _ in
+      .subscribe(with: self) { vc, _ in
         vc.isEditingMode.toggle()
         vc.tableView.setEditing(vc.isEditingMode, animated: true)
         vc.editButton.title = vc.isEditingMode ? "완료" : "편집"
-      })
+      }
       .disposed(by: disposeBag)
 
     // MARK: - cell에 데이터 바인딩
@@ -96,33 +95,29 @@ final class WorldTimeViewController: UIViewController {
 
     // MARK: - 스와이프 삭제
 
-    // TODO: 삭제 데이터가 다른곳으로 가야함
     tableView.rx.itemDeleted
-      .withUnretained(self)
-      .subscribe(onNext: { vc, indexPath in
+      .subscribe(with: self) { vc, indexPath in
         vc.viewModel.deleteItem(indexPath.row)
-      })
+      }
       .disposed(by: disposeBag)
 
     // MARK: - 셀 위치 변경
 
     tableView.rx.itemMoved
-      .withUnretained(self)
-      .subscribe(onNext: { vc, move in
+      .subscribe(with: self) { vc, move in
         // sourceIndex: 드래그 시작한 셀의 위치, destinationIndex: 드롭 도착한 셀의 위치
         vc.viewModel.moveItem(fromIndex: move.sourceIndex.row, toIndex: move.destinationIndex.row)
-      })
+      }
       .disposed(by: disposeBag)
 
     // MARK: - Modal 페이지로 이동
 
     addButton.rx.tap
-      .withUnretained(self)
-      .subscribe(onNext: { vc, _ in
+      .subscribe(with: self) { vc, _ in
         let citySelectionVC = WorldTimeCitySelectionViewController()
         citySelectionVC.modalPresentationStyle = .automatic // 하단에서 올라오는 카드 형식. 스크롤 가능
         vc.present(citySelectionVC, animated: true)
-      })
+      }
       .disposed(by: disposeBag)
   }
 }
