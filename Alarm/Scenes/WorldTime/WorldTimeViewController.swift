@@ -18,6 +18,7 @@ final class WorldTimeViewController: UIViewController {
   private let mainColor = UIColor(named: "mainColor")
 
   private let viewModel = WorldTimeViewModel()
+  
   private lazy var tableView = UITableView().then {
     $0.separatorStyle = .none
     $0.register(WorldTimeCell.self, forCellReuseIdentifier: WorldTimeCell.id)
@@ -28,7 +29,6 @@ final class WorldTimeViewController: UIViewController {
   private let addButton = UIBarButtonItem(barButtonSystemItem: .add, target: nil, action: nil)
 
   private var isEditingMode = false
-  private let itemsRelay = BehaviorRelay<[String]>(value: ["서울", "도쿄", "런던", "파리", "로마"])
 
   private let disposeBag = DisposeBag()
 
@@ -72,6 +72,7 @@ final class WorldTimeViewController: UIViewController {
 
   private func bind() {
     tableView.rx.setDelegate(self).disposed(by: disposeBag) // delegate
+
     // MARK: - 편집 모드
 
     editButton.rx.tap
@@ -92,13 +93,12 @@ final class WorldTimeViewController: UIViewController {
       .disposed(by: disposeBag)
 
     // MARK: - 스와이프 삭제
+
     // TODO: 삭제 데이터가 다른곳으로 가야함
     tableView.rx.itemDeleted
       .withUnretained(self)
       .subscribe(onNext: { vc, indexPath in
-        var newItems = vc.itemsRelay.value
-        newItems.remove(at: indexPath.row)
-        vc.itemsRelay.accept(newItems) // accept는 덮어쓰기 느낌 (교체)
+        vc.viewModel.deleteItem(indexPath.row)
       })
       .disposed(by: disposeBag)
 
@@ -107,11 +107,8 @@ final class WorldTimeViewController: UIViewController {
     tableView.rx.itemMoved
       .withUnretained(self)
       .subscribe(onNext: { vc, move in
-        var newItems = vc.itemsRelay.value
         // sourceIndex: 드래그 시작한 셀의 위치, destinationIndex: 드롭 도착한 셀의 위치
-        let moved = newItems.remove(at: move.sourceIndex.row) // 값을 꺼내면서 배열에서 삭제
-        newItems.insert(moved, at: move.destinationIndex.row)
-        vc.itemsRelay.accept(newItems)
+        vc.viewModel.moveItem(fromIndex: move.sourceIndex.row, toIndex: move.destinationIndex.row)
       })
       .disposed(by: disposeBag)
 

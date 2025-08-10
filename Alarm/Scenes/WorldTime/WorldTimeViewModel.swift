@@ -23,4 +23,17 @@ final class WorldTimeViewModel {
     .init(city: "괌", subInfo: "내일, +1시간", meridiem: "오전", time: "00:35"),
     .init(city: "고텐부르크", subInfo: "오늘, -7시간", meridiem: "오후", time: "04:35")
   ])
+
+  func deleteItem(_ index: Int) {
+    var items = timesRelay.value
+    items.remove(at: index)
+    timesRelay.accept(items)
+  }
+
+  func moveItem(fromIndex: Int, toIndex: Int) {
+    var items = timesRelay.value
+    let moved = items.remove(at: fromIndex)
+    items.insert(moved, at: toIndex)
+    timesRelay.accept(items)
+  }
 }
