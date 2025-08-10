@@ -20,6 +20,12 @@ final class StopwatchViewController: UIViewController {
   // 원형 뷰
   private let stopwatchCircleView = StopwatchCircleView()
 
+  // 이미지 프로퍼티
+  private let stopwatchImage = UIImage(systemName: "stopwatch.fill")
+  private let trashImage = UIImage(systemName: "trash.fill")
+  private let playImage = UIImage(systemName: "play.fill")
+  private let pauseImage = UIImage(systemName: "pause.fill")
+
   // 시간 레이블
   private let timeLabel = UILabel().then {
     $0.text = "00:00:00"
@@ -191,27 +197,24 @@ extension StopwatchViewController {
 
     // isRunning → 버튼 이미지 변경
     viewModel.isRunning
-      .map { $0 ? UIImage(systemName: "pause.fill") : UIImage(systemName: "play.fill") } // .map으로 Bool -> UIImage?로 변환된 Obsevable
+      .map { [weak self] isRunning in
+        isRunning ? self?.pauseImage : self?.playImage
+      }
       .bind(to: playPauseButton.rx.image())
       .disposed(by: disposeBag)
 
     // isRunning → 재설정 버튼 이미지 변경
     viewModel.isRunning
-      .map { $0 ? UIImage(systemName: "stopwatch.fill") : UIImage(systemName: "trash.fill") }
+      .map { [weak self] isRunning in
+        isRunning ? self?.stopwatchImage : self?.trashImage
+      }
       .bind(to: lapResetButton.rx.image())
       .disposed(by: disposeBag)
 
     // timePassed → 밀리세컨드 포맷으로 변환 후 표시
     viewModel.timePassed
-      .map { time -> String in
-        let totalMilliseconds = Int(time * 100)
-
-        let totalSeconds = totalMilliseconds / 100
-        let minutes = totalSeconds / 60
-        let seconds = totalSeconds % 60
-        let milliseconds = totalMilliseconds % 100
-
-        return String(format: "%02d:%02d:%02d", minutes, seconds, milliseconds)
+      .map { [weak self] time in
+        self?.viewModel.formatTime(time) ?? "00:00:00"
       }
       .bind(to: timeLabel.rx.text)
       .disposed(by: disposeBag)
