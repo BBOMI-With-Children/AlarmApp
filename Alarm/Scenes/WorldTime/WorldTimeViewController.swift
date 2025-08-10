@@ -118,9 +118,10 @@ final class WorldTimeViewController: UIViewController {
 
     addButton.rx.tap
       .withUnretained(self)
-      .subscribe(onNext: { _, _ in
-        print("Tap")
-        // TODO: Modal 페이지로 이동 구현
+      .subscribe(onNext: { vc, _ in
+        let citySelectionVC = WorldTimeCitySelectionViewController()
+        citySelectionVC.modalPresentationStyle = .automatic // 하단에서 올라오는 카드 형식. 스크롤 가능
+        vc.present(citySelectionVC, animated: true)
       })
       .disposed(by: disposeBag)
   }
