@@ -22,6 +22,7 @@ final class StopwatchViewController: UIViewController {
 
   // 시간 레이블
   private let timeLabel = UILabel().then {
+    $0.text = "00:00:00"
     $0.font = .monospacedDigitSystemFont(ofSize: 36, weight: .bold)
     $0.textColor = .white
     $0.textAlignment = .center
@@ -39,23 +40,27 @@ final class StopwatchViewController: UIViewController {
       s.bottomSeparatorInsets = NSDirectionalEdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0)
       return s
     }
-
     let layout = UICollectionViewCompositionalLayout.list(using: config)
     let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+    collectionView.register(LapCollectionViewCell.self, forCellWithReuseIdentifier: LapCollectionViewCell.reuseIdentifier)
     return collectionView
   }()
 
   // 컬렉션 뷰 데이터 소스
-  lazy var dataSource = makeDataSource(collectionView)
+  private var dataSource: UICollectionViewDiffableDataSource<Int, LapTime>!
 
   // 랩,재설정 버튼
   private let lapResetButton = UIButton().then {
+    let image = UIImage(systemName: "stopwatch.fill")
+    $0.setImage(image, for: .normal)
     $0.tintColor = .white
     $0.backgroundColor = .modal
   }
 
   // 시작, 중단 버튼
   private let playPauseButton = UIButton().then {
+    let image = UIImage(systemName: "play.fill")
+    $0.setImage(image, for: .normal)
     $0.tintColor = .background
     $0.backgroundColor = .main
   }
@@ -80,6 +85,7 @@ final class StopwatchViewController: UIViewController {
   override func viewDidLoad() {
     super.viewDidLoad()
     configureUI()
+    configureDataSource()
     bindViewModel()
   }
 
@@ -159,58 +165,16 @@ extension StopwatchViewController {
   }
 
   // DiffableDataSource를 생성하는 함수
-  private func makeDataSource(_ collectionView: UICollectionView) -> UICollectionViewDiffableDataSource<Int, LapTime> {
-    // 1. 셀 등록(CellRegistration)
-    let cellRegistration = UICollectionView.CellRegistration<UICollectionViewListCell, LapTime> { [weak self] cell, _, lap in
-      // 셀의 콘텐츠 구성
-      cell.contentView.subviews.forEach { $0.removeFromSuperview() } // UI 초기화
-
-      let lapNumberLabel = UILabel().then {
-        $0.text = "랩 \(lap.number)"
-        $0.font = .systemFont(ofSize: 16, weight: .medium)
+  private func configureDataSource() {
+    dataSource = UICollectionViewDiffableDataSource<Int, LapTime>(collectionView: collectionView) { [weak self] collectionView, indexPath, lap in
+      guard let self = self,
+            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: LapCollectionViewCell.reuseIdentifier, for: indexPath) as? LapCollectionViewCell
+      else {
+        return UICollectionViewCell()
       }
-
-      let lapTimeLabel = UILabel().then {
-        $0.text = self?.viewModel.formatTime(lap.time)
-        $0.font = .monospacedDigitSystemFont(ofSize: 16, weight: .regular)
-        $0.textAlignment = .right
-      }
-
-      cell.contentView.addSubview(lapNumberLabel)
-      cell.contentView.addSubview(lapTimeLabel)
-
-      lapNumberLabel.snp.makeConstraints {
-        $0.leading.equalToSuperview().offset(16)
-        $0.centerY.equalToSuperview()
-      }
-
-      lapTimeLabel.snp.makeConstraints {
-        $0.trailing.equalToSuperview().inset(16)
-        $0.centerY.equalToSuperview()
-      }
-
-      // 셀의 배경 구성
-      var background = UIBackgroundConfiguration.listPlainCell()
-      background.backgroundColor = .background
-      cell.backgroundConfiguration = background
+      cell.configure(lapNumber: lap.number, lapTime: self.viewModel.formatTime(lap.time))
+      return cell
     }
-
-    // 2. DiffableDataSource 생성
-    //    제네릭: <SectionIdentifierType, ItemIdentifierType>
-    //    셀을 어떻게 만들어서 반환할지 cellProvider 클로저로 정의
-    let dataSource = UICollectionViewDiffableDataSource<Int, LapTime>(
-      collectionView: collectionView
-    ) { collectionView, indexPath, lap in
-      // cellRegistration을 사용해 셀 dequeue + 구성
-      collectionView.dequeueConfiguredReusableCell(
-        using: cellRegistration,
-        for: indexPath,
-        item: lap
-      )
-    }
-
-    // 3. 완성된 데이터소스 반환
-    return dataSource
   }
 }
 
