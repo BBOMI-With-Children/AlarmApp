@@ -50,7 +50,8 @@ final class WorldTimeCell: UITableViewCell {
   private let leftStackView = UIStackView().then { // cityLabel + timeDifferenceLabel
     $0.axis = .vertical
     $0.alignment = .leading
-    $0.spacing = 4
+    $0.distribution = .fillProportionally
+    $0.spacing = 2
   }
 
   private let contentStackView = UIStackView().then {
