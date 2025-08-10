@@ -19,6 +19,11 @@ final class WorldTimeCitySelectionViewController: UIViewController {
   private let backgroundColor = UIColor(named: "backgroundColor")
   private let mainColor = UIColor(named: "mainColor")
   
+  // 더미 데이터 (ViewModel 파일 만들어서 옮길 예정. 테스트 용도)
+  private var dummyCities: [String] = [
+    "서울", "도쿄", "뉴욕", "런던", "파리", "베를린", "시드니", "홍콩", "방콕"
+  ]
+  
   private let titleLabel = UILabel().then {
     $0.text = "도시 선택"
     $0.textColor = .white
@@ -44,6 +49,12 @@ final class WorldTimeCitySelectionViewController: UIViewController {
   
   private lazy var tableView = UITableView().then {
     $0.backgroundColor = backgroundColor
+    $0.register(UITableViewCell.self, forCellReuseIdentifier: "Cell")
+    $0.dataSource = self
+    $0.separatorStyle = .singleLine
+    $0.separatorColor = .systemGray4
+    $0.separatorInset = UIEdgeInsets(top: 0, left: 8, bottom: 0, right: 8)
+
   }
   
   // MARK: - Lifecycle
@@ -94,5 +105,27 @@ final class WorldTimeCitySelectionViewController: UIViewController {
         vc.dismiss(animated: true)
       }
       .disposed(by: disposeBag)
+  }
+}
+
+// MARK: DataSource
+
+extension WorldTimeCitySelectionViewController: UITableViewDataSource {
+  func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    return dummyCities.count
+  }
+
+  func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+    let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
+    cell.textLabel?.text = dummyCities[indexPath.row]
+    cell.textLabel?.textColor = .white
+    cell.backgroundColor = backgroundColor
+    cell.preservesSuperviewLayoutMargins = false // 기본 마진 레이아웃 사용 x
+    cell.layoutMargins = .zero
+    return cell
+  }
+
+  func numberOfSections(in tableView: UITableView) -> Int {
+    1
   }
 }
