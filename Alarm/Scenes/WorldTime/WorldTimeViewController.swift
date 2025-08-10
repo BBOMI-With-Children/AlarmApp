@@ -17,13 +17,18 @@ final class WorldTimeViewController: UIViewController {
   private let backgroundColor = UIColor(named: "backgroundColor")
   private let mainColor = UIColor(named: "mainColor")
 
-  private let tableView = UITableView()
+  private let viewModel = WorldTimeViewModel()
+  
+  private lazy var tableView = UITableView().then {
+    $0.separatorStyle = .none
+    $0.register(WorldTimeCell.self, forCellReuseIdentifier: WorldTimeCell.id)
+    $0.backgroundColor = backgroundColor
+  }
 
   private let editButton = UIBarButtonItem(title: "편집", style: .plain, target: nil, action: nil)
   private let addButton = UIBarButtonItem(barButtonSystemItem: .add, target: nil, action: nil)
 
   private var isEditingMode = false
-  private let itemsRelay = BehaviorRelay<[String]>(value: ["서울", "도쿄", "런던", "파리", "로마"])
 
   private let disposeBag = DisposeBag()
 
@@ -31,15 +36,15 @@ final class WorldTimeViewController: UIViewController {
 
   override func viewDidLoad() {
     super.viewDidLoad()
-    configureUI()
-    configureLayout()
-    configureNavigationBar()
+    setupUI()
+    setupLayout()
+    setupNavigationBar()
     bind()
   }
 
   // MARK: - Private Methods
 
-  private func configureUI() {
+  private func setupUI() {
     title = "세계 시계"
     navigationController?.navigationBar.prefersLargeTitles = true // LargeTitles
     navigationController?.navigationBar.largeTitleTextAttributes = [
@@ -48,11 +53,9 @@ final class WorldTimeViewController: UIViewController {
 
     view.backgroundColor = backgroundColor
     view.addSubview(tableView)
-    tableView.backgroundColor = backgroundColor
-    tableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
   }
 
-  private func configureLayout() {
+  private func setupLayout() {
     tableView.snp.makeConstraints {
       $0.edges.equalTo(view.safeAreaLayoutGuide)
     }
@@ -60,7 +63,7 @@ final class WorldTimeViewController: UIViewController {
 
   // MARK: - 네비게이션 바 추가
 
-  private func configureNavigationBar() {
+  private func setupNavigationBar() {
     navigationItem.leftBarButtonItem = editButton
     navigationItem.rightBarButtonItem = addButton
     editButton.tintColor = mainColor
@@ -68,6 +71,8 @@ final class WorldTimeViewController: UIViewController {
   }
 
   private func bind() {
+    tableView.rx.setDelegate(self).disposed(by: disposeBag) // delegate
+
     // MARK: - 편집 모드
 
     editButton.rx.tap
@@ -79,25 +84,21 @@ final class WorldTimeViewController: UIViewController {
       })
       .disposed(by: disposeBag)
 
-    // MARK: - 테이블뷰 아이템 바인딩 (더미 데이터)
+    // MARK: - cell에 데이터 바인딩
 
-    itemsRelay
-      .asDriver(onErrorJustReturn: []) // Driver<[String]>로 변환, 에러 시 빈 배열
-      .drive(tableView.rx.items(cellIdentifier: "cell")) { _, city, cell in // (row, element, cell)
-        cell.textLabel?.text = city
-        cell.selectionStyle = .none
-        cell.backgroundColor = self.backgroundColor
+    viewModel.timesRelay
+      .bind(to: tableView.rx.items(cellIdentifier: WorldTimeCell.id, cellType: WorldTimeCell.self)) { _, model, cell in
+        cell.configure(model)
       }
       .disposed(by: disposeBag)
 
     // MARK: - 스와이프 삭제
 
+    // TODO: 삭제 데이터가 다른곳으로 가야함
     tableView.rx.itemDeleted
       .withUnretained(self)
       .subscribe(onNext: { vc, indexPath in
-        var newItems = vc.itemsRelay.value
-        newItems.remove(at: indexPath.row)
-        vc.itemsRelay.accept(newItems) // accept는 덮어쓰기 느낌 (교체)
+        vc.viewModel.deleteItem(indexPath.row)
       })
       .disposed(by: disposeBag)
 
@@ -106,11 +107,8 @@ final class WorldTimeViewController: UIViewController {
     tableView.rx.itemMoved
       .withUnretained(self)
       .subscribe(onNext: { vc, move in
-        var newItems = vc.itemsRelay.value
         // sourceIndex: 드래그 시작한 셀의 위치, destinationIndex: 드롭 도착한 셀의 위치
-        let moved = newItems.remove(at: move.sourceIndex.row) // 값을 꺼내면서 배열에서 삭제
-        newItems.insert(moved, at: move.destinationIndex.row)
-        vc.itemsRelay.accept(newItems)
+        vc.viewModel.moveItem(fromIndex: move.sourceIndex.row, toIndex: move.destinationIndex.row)
       })
       .disposed(by: disposeBag)
 
@@ -123,5 +121,11 @@ final class WorldTimeViewController: UIViewController {
         // TODO: Modal 페이지로 이동 구현
       })
       .disposed(by: disposeBag)
+  }
+}
+
+extension WorldTimeViewController: UITableViewDelegate {
+  func tableView(_ tableView: UITableView, titleForDeleteConfirmationButtonForRowAt indexPath: IndexPath) -> String? {
+    "삭제"
   }
 }
