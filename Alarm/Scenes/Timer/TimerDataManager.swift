@@ -11,32 +11,32 @@ import RxSwift
 final class TimerDataManager {  // 타이머 데이터 저장/조회
   static let shared = TimerDataManager()
 
-  private var items: [TimerItem] = []  // 데이터 배열
+  private var items: [TimerItem] = []  // 데이터 저장소
 
-  private let subject = BehaviorSubject<[TimerItem]>(value: [])
+  private let subject = BehaviorSubject<[TimerItem]>(value: []) // 값이 변화할 때마다 결과 방출.
   var timers: Observable<[TimerItem]> { subject.asObservable() }
 
-  private let queue = DispatchQueue(label: "TimerManager.queue")
+  private let queue = DispatchQueue(label: "TimerManager.queue") // 순서대로 처리하기 위한 큐
 
   private init() {}
 
-  func loadTimers() {  // 초기 조회
+  func loadTimers() {  // 초기 조회(userDefault에서 읽고 items에 담아 onNext로 방출해 구독 동기화
     queue.sync {
       self.items = Self.loadFromUserDefaults()
       self.subject.onNext(self.items)
     }
   }
 
-  private func saveTimers() {
+  private func saveTimers() { // userDefault에 저장
     Self.saveToUserDefaults(items)
   }
 
   @discardableResult
   func mutate<T>(_ block: (inout [TimerItem]) -> T) -> T {
     queue.sync {
-      let result = block(&items)
-      subject.onNext(items)
-      saveTimers()
+      let result = block(&items)  // 배열 직접 수정(수정 + 결과 계산)
+      subject.onNext(items)       // 변경 방출
+      saveTimers()                // 저장
       return result
     }
   }

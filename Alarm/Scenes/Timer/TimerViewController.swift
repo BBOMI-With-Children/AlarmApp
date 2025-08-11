@@ -32,13 +32,14 @@ final class TimerViewController: UIViewController {
     TimerDataManager.shared.loadTimers()  // 타이머 데이터 조회
 
     TimerDataManager.shared.timers  // timers 구독
+      .observe(on: MainScheduler.instance)
       .subscribe(onNext: { [weak self] items in  // timers에 새로운 데이터가 들어오면 호출
-        self?.timerItems = items  // 최신 데이터를 VC 상태에 반영
-        self?.timerTableView.reloadData()  // 테이블뷰 새로고침
+        self?.timerItems = items  // 최신 스냅샷을 VC 상태에 반영
+        self?.timerTableView.reloadData()  // 스트림 방출마다 테이블 갱신
       })
       .disposed(by: disposeBag)
 
-    // 타이머(1초마다 이벤트 발생)
+    // 타이머(1초마다 이벤트 처리)
     Observable<Int>.interval(.seconds(1), scheduler: MainScheduler.instance)
       .subscribe(onNext: { _ in
         let finished: [TimerItem] = TimerDataManager.shared.mutate { items in
@@ -93,14 +94,6 @@ final class TimerViewController: UIViewController {
       $0.tintColor = UIColor(named: "mainColor")
     }
 
-    // navigationItem.leftBarButtonItem = UIBarButtonItem(
-    //   title: "편집",
-    //   primaryAction: nil,
-    //   menu: nil
-    // ).then {
-    //   $0.tintColor = UIColor(named: "mainColor")
-    // }
-
     let appearance = UINavigationBarAppearance()
     appearance.configureWithOpaqueBackground()
     appearance.backgroundColor = UIColor(named: "backgroundColor")
@@ -129,7 +122,7 @@ final class TimerViewController: UIViewController {
   private func requestNotificationPermission() {
     UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { granted, err in
       if let err = err {  // 에러일 때
-        print("\(err)")
+        print("requestNotificationPermission: \(err)")
       } else {
         print("\(granted)")  // 권한 파악
       }
@@ -146,7 +139,7 @@ final class TimerViewController: UIViewController {
     let request = UNNotificationRequest(identifier: item.id.uuidString, content: content, trigger: nil)
     UNUserNotificationCenter.current().add(request) { err in
       if let err = err {
-        print("\(err)")
+        print("notifyTimerFinished: \(err)")
       }
     }
   }
