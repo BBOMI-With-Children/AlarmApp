@@ -51,7 +51,6 @@ final class WorldTimeCitySelectionViewController: UIViewController {
     $0.separatorStyle = .singleLine
     $0.separatorColor = .systemGray4
     $0.separatorInset = UIEdgeInsets(top: 0, left: 8, bottom: 0, right: 8)
-
   }
   
   // MARK: - Lifecycle
@@ -104,6 +103,7 @@ final class WorldTimeCitySelectionViewController: UIViewController {
       .disposed(by: disposeBag)
     
     // MARK: - 검색어를 viewModel의 filter에 전달
+
     searchBar.rx.text.orEmpty
       .debounce(.milliseconds(200), scheduler: MainScheduler.instance) // 0.2초동안 멈추면 실행
       .distinctUntilChanged() // 이전 값과 동일하면 무시
@@ -113,6 +113,7 @@ final class WorldTimeCitySelectionViewController: UIViewController {
       .disposed(by: disposeBag)
     
     // MARK: - 데이터 변경 시 테이블 갱신
+
     viewModel.rows
       .asDriver(onErrorJustReturn: [])
       .drive(with: self) { vc, _ in
