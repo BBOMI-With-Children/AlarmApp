@@ -22,7 +22,7 @@ final class WorldTimeViewModel {
   func addCity(_ row: CityRow) {
     // TODO: 로직이 몰려서.. 다 끝낸 이후 쪼갤 예정
     // 중복 방지(city 기준)
-    let items = timesRelay.value
+    var items = timesRelay.value
     if items.contains(where: { $0.city == row.city }) { return }
 
     // MARK: - 타임존 통해서 GMT 계산
@@ -56,6 +56,28 @@ final class WorldTimeViewModel {
     let gmt = "\(GMTDayText), \(sign)\(hours)시간" // 오늘, +12시간
 
     // MARK: - 오전/오후, 시각
+
+    let locale = Locale(identifier: "ko_KR")
+
+    // am,pm
+    let ampmDF = DateFormatter()
+    ampmDF.locale = locale // 표시 언어 (AM/PM 대신 오전/오후)
+    ampmDF.timeZone = tz // 기준 시간대 (그 도시의 기준 시간)
+    ampmDF.dateFormat = "a" // 오전/오후 ("a"가 오전/오후 지시자. 라고함 오..)
+    let meridiem = ampmDF.string(from: now)
+
+    // 시간
+    let timeDF = DateFormatter()
+    timeDF.locale = locale
+    timeDF.timeZone = tz
+    timeDF.dateFormat = "hh:mm" // 12시간제
+    let time = timeDF.string(from: now)
+    print("\(meridiem) \(time)")
+
+    // 추가!
+    let item = WorldTimeItem(city: row.city, gmt: gmt, meridiem: meridiem, time: time)
+    items.append(item)
+    timesRelay.accept(items)
   }
 
   func deleteCity(_ index: Int) {
