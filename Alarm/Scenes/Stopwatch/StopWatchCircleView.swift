@@ -30,14 +30,14 @@ class StopwatchCircleView: UIView {
   }
 
   // 내부적으로 현재 진행값을 보관하는 프로퍼티
-  private var _progress: Float = 0
+  private var _progress: CGFloat = 0
   // 공통으로 사용하는 선 두께
   private var lineWidth: CGFloat = 10
 
   // 외부에서 사용하는 progress
-  var progress: Float {
+  var progress: CGFloat {
     get { return _progress }
-    set { setProgress(newValue, animated: false) }
+    set { setProgress(newValue) }
   }
 
   // MARK: - Init
@@ -65,43 +65,34 @@ class StopwatchCircleView: UIView {
   // MARK: - Progress Setter
 
   // 진행상황 설정
-  func setProgress(_ progress: Float, animated: Bool) {
+  func setProgress(_ progress: CGFloat) {
     guard _progress != progress else { return }
     _progress = max(0.0, min(progress, 1.0))
-    renderProgress(progress, animated: animated)
+    renderProgress(progress)
   }
 }
 
 // MARK: - Core Logic
 
 extension StopwatchCircleView {
-  private func renderProgress(_ progress: Float, animated: Bool) {
+  private func renderProgress(_ progress: CGFloat) {
     // CATransaction은 여러 CALayer 관련 변경 사항을 하나의 애니메이션 트랜젝션으로 묶어줌
     CATransaction.begin() // begin으로 트랜잭션 시작
     defer { CATransaction.commit() } // defer를 사용해 함수 종료 시점에 무조건 commit()으로 트랜직션 종료
 
-    if !animated {
-      CATransaction.setDisableActions(true)
-    } else {
-      CATransaction.setAnimationDuration(1.5)
-    }
+    CATransaction.setDisableActions(true)
 
-    progressLayer.strokeEnd = CGFloat(progress)
+    progressLayer.strokeEnd = progress
   }
 
   // 원호 경로(벡터 path)를 생성하여 반환하는 메서드
   private func arcPath(in bounds: CGRect) -> UIBezierPath {
-    // 시계 방향 기준
-    let n: CGFloat = 1.5 // 1.5바퀴
-    let r: CGFloat = 2 // 2π = 360도
-
     let radius = min(bounds.width, bounds.height) * 0.5 - lineWidth * 0.5
-
     return UIBezierPath(
       arcCenter: CGPoint(x: bounds.midX, y: bounds.midY),
       radius: radius,
-      startAngle: .pi * 1.5,
-      endAngle: .pi * (r + n),
+      startAngle: -.pi / 2, // 12시 방향 시작
+      endAngle: 1.5 * .pi, // 1바퀴
       clockwise: true
     )
   }
