@@ -74,7 +74,7 @@ final class WorldTimeViewModel {
     return (gmt, meridiem, time)
   }
 
-  // MARK: - addCity
+  // MARK: - 도시 추가
 
   func addCity(_ row: CityRow) {
     // 중복 방지(city 기준)
@@ -92,12 +92,14 @@ final class WorldTimeViewModel {
     timesRelay.accept(items)
   }
 
+  // MARK: - 도시 삭제
   func deleteCity(_ index: Int) {
     var items = timesRelay.value
     items.remove(at: index)
     timesRelay.accept(items)
   }
 
+  // MARK: - 도시 인덱스 이동
   func moveCity(fromIndex: Int, toIndex: Int) {
     var items = timesRelay.value
     let moved = items.remove(at: fromIndex)
@@ -116,10 +118,10 @@ final class WorldTimeViewModel {
     let nextMinute = calendar.nextDate(after: now, matching: DateComponents(second: 0), matchingPolicy: .nextTime) ?? now.addingTimeInterval(60)
 
     // .timeIntervalSince: 두 날짜의 차이를 초 단위로 반환함 (즉, 다음 분까지 남은 초가 delay에 들어가게됨)
-    let delay = nextMinute.timeIntervalSince(now)
-    minuteTimer = Observable<Int>.timer( // 타이머 생성
-      .seconds(Int(delay)), // 첫 번째 실행: delay초 뒤에 실행
-      period: .seconds(60), // 반복 주기: 60초 마다
+    let delay = Int(ceil(nextMinute.timeIntervalSince(now) * 1000)) // ms단위로 변환해서 ceil로 소수점 올림 계산
+    minuteTimer = Observable<Int>.timer(
+      .milliseconds(delay),  // 다음 분 00초에 첫 실행
+      period: .seconds(60),  // 이후 60초마다 실행
       scheduler: MainScheduler.instance
     ) // 타이머가 작동되는 60초마다 refreshDisplayedTimes 실행
     .subscribe(with: self) { vc, _ in
