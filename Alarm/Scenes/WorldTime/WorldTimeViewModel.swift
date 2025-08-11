@@ -21,6 +21,39 @@ final class WorldTimeViewModel {
   let timesRelay = BehaviorRelay<[WorldTimeItem]>(value: [])
   private var minuteTimer: Disposable? // 구독 해제위해
 
+  // MARK: UserDefaults
+
+  private let storageKey = "worldTimes" // key값
+
+  // TimeZones 저장
+  private func saveTimeZonesForDefaults() {
+    let ids = timesRelay.value.map { $0.timezoneID } // timezoneID를 ids에 넣어서 저장
+    UserDefaults.standard.set(ids, forKey: storageKey)
+  }
+
+  // TimeZoneID를 도시명으로 사용 (ex: "Asia/Seoul" -> "Seoul")
+  private func cityName(timezoneID: String) -> String {
+    let city = timezoneID.split(separator: "/").last.map(String.init) ?? timezoneID // "New_York"
+    return city.replacingOccurrences(of: "_", with: " ") // "New York"
+  }
+
+  // TimeZones 불러오기
+  func loadTimeZonesFromDefaults() {
+    let ids = UserDefaults.standard.stringArray(forKey: storageKey) ?? [] // storageKey값으로 받아옴
+    let now = Date()
+    let items: [WorldTimeItem] = ids.compactMap { id in
+      guard let display = computeDisplay(timezoneID: id, now: now) else { return nil }
+      return WorldTimeItem(
+        timezoneID: id,
+        city: cityName(timezoneID: id),
+        gmt: display.gmt,
+        meridiem: display.meridiem,
+        time: display.time
+      )
+    }
+    timesRelay.accept(items)
+  }
+
   // MARK: - 공통 값 묶어서 계산: GMT(+/-n시간) / 오전/오후 / 시각
 
   private func computeDisplay(
@@ -90,21 +123,26 @@ final class WorldTimeViewModel {
     let item = WorldTimeItem(timezoneID: row.timezoneID, city: row.city, gmt: display.gmt, meridiem: display.meridiem, time: display.time)
     items.append(item)
     timesRelay.accept(items)
+    saveTimeZonesForDefaults()
   }
 
   // MARK: - 도시 삭제
+
   func deleteCity(_ index: Int) {
     var items = timesRelay.value
     items.remove(at: index)
     timesRelay.accept(items)
+    saveTimeZonesForDefaults()
   }
 
   // MARK: - 도시 인덱스 이동
+
   func moveCity(fromIndex: Int, toIndex: Int) {
     var items = timesRelay.value
     let moved = items.remove(at: fromIndex)
     items.insert(moved, at: toIndex)
     timesRelay.accept(items)
+    saveTimeZonesForDefaults()
   }
 
   // MARK: - 분 단위 자동 갱신 (Timer)
@@ -120,8 +158,8 @@ final class WorldTimeViewModel {
     // .timeIntervalSince: 두 날짜의 차이를 초 단위로 반환함 (즉, 다음 분까지 남은 초가 delay에 들어가게됨)
     let delay = Int(ceil(nextMinute.timeIntervalSince(now) * 1000)) // ms단위로 변환해서 ceil로 소수점 올림 계산
     minuteTimer = Observable<Int>.timer(
-      .milliseconds(delay),  // 다음 분 00초에 첫 실행
-      period: .seconds(60),  // 이후 60초마다 실행
+      .milliseconds(delay), // 다음 분 00초에 첫 실행
+      period: .seconds(60), // 이후 60초마다 실행
       scheduler: MainScheduler.instance
     ) // 타이머가 작동되는 60초마다 refreshDisplayedTimes 실행
     .subscribe(with: self) { vc, _ in

@@ -41,6 +41,7 @@ final class WorldTimeViewController: UIViewController {
     setupLayout()
     setupNavigationBar()
     bind()
+    viewModel.loadTimeZonesFromDefaults()
   }
 
   override func viewWillAppear(_ animated: Bool) {
