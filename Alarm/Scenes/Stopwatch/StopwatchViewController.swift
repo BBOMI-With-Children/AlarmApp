@@ -246,5 +246,13 @@ extension StopwatchViewController {
         self?.applySnapshot(laps)
       }
       .disposed(by: disposeBag)
+
+    // 원형 UI Progress
+    viewModel.timePassed
+      .map { [weak self] time in
+        self?.viewModel.circleProgress(time) ?? 0
+      }
+      .bind(to: stopwatchCircleView.rx.progress)
+      .disposed(by: disposeBag)
   }
 }
