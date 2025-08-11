@@ -42,6 +42,17 @@ final class WorldTimeViewController: UIViewController {
     setupNavigationBar()
     bind()
   }
+  
+  override func viewWillAppear(_ animated: Bool) {
+    super.viewWillAppear(animated)
+    viewModel.updateWorldTimes()
+    viewModel.startMinuteUpdates()
+  }
+  
+  override func viewWillDisappear(_ animated: Bool) {
+    super.viewWillDisappear(animated)
+    viewModel.stopMinuteUpdates()
+  }
 
   // MARK: - setupUI
 
