@@ -25,10 +25,12 @@ final class AlarmViewController: UIViewController {
     tableView.backgroundColor = bg
     tableView.frame = view.bounds
     tableView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-    tableView.separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
-    tableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
+    tableView.separatorStyle = .none
+    tableView.contentInset = UIEdgeInsets(top: 8, left: 0, bottom: 8, right: 0)
+    tableView.rowHeight = 112
+    tableView.register(AlarmCell.self, forCellReuseIdentifier: AlarmCell.id)
     view.addSubview(tableView)
-    
+
     // MARK: - 네비게이션 바 설정
     
     title = "알람"
@@ -55,16 +57,17 @@ final class AlarmViewController: UIViewController {
     
     AlarmManager.shared.alarms
       .asDriver()
-      .drive(tableView.rx.items(cellIdentifier: "cell")) { _, alarm, cell in
-        cell.backgroundColor = bg
-        var cfg = UIListContentConfiguration.valueCell()
-        cfg.text = "\(alarm.time) - \(alarm.subtitle)"
-        cfg.textProperties.font = .systemFont(ofSize: 20, weight: .regular)
-        cell.contentConfiguration = cfg
-        cell.selectionStyle = .none
+      .drive(tableView.rx.items(
+        cellIdentifier: AlarmCell.id,
+        cellType: AlarmCell.self
+      )) { _, alarm, cell in
+        cell.configure(alarm)
+        cell.onToggle = { _ in
+          AlarmManager.shared.toggle(id: alarm.id)
+        }
       }
       .disposed(by: disposeBag)
-    
+
     // MARK: - 편집 버튼 탭 시 편집 모드 토글
     
     editButton.rx.tap
