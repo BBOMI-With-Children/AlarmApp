@@ -57,7 +57,7 @@ final class WorldTimeCitySelectionViewModel {
   // MARK: - 도시 이름
 
   private func cityName(_ tzID: String) -> String {
-    let raw = tzID.split(separator: "/").last.map { String($0) } ?? tzID
+    let raw = tzID.split(separator: "/").last.map { String($0) } ?? "Other"
     return raw.replacingOccurrences(of: "_", with: " ") // New_York가 있다면 New Work로
   }
 
