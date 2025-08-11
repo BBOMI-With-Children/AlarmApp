@@ -119,9 +119,9 @@ final class WorldTimeViewController: UIViewController {
         vc.present(vc.citySelectionVC, animated: true)
       }
       .disposed(by: disposeBag)
-    
+
     // MARK: - Modal에서 누른 데이터 받기
-    
+
     citySelectionVC.didSelectCity
       .subscribe(with: self) { vc, row in
         vc.viewModel.addCity(row)

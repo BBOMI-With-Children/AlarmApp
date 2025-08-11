@@ -25,7 +25,9 @@ final class WorldTimeViewModel {
     let items = timesRelay.value
     if items.contains(where: { $0.city == row.city }) { return }
 
-    // 타임존
+    // MARK: - 타임존 통해서 GMT 계산
+
+    // 타임존 생성 (타겟)
     guard let tz = TimeZone(identifier: row.timezoneID) else { return } // 받아온 timeZoneID로 생성
     let now = Date()
     var targetCal = Calendar.current // 현재 캘린더
@@ -42,7 +44,7 @@ final class WorldTimeViewModel {
       case -1: return "어제"
       case 0: return "오늘"
       case 1: return "내일"
-      default: return "이건 생각 못했는걸?"
+      default: return "이건 생각 못했는걸..?"
       }
     }
 
@@ -51,7 +53,9 @@ final class WorldTimeViewModel {
     let absSec = abs(seconds) // 초 단위 절댓값으로 (어차피 부호는 위에서 구하니까)
     let hours = absSec / 3600 // 시간구함
 
-    let gmt = "\(GMTDayText), \(sign)\(hours)시간" // GMT, +12시간
+    let gmt = "\(GMTDayText), \(sign)\(hours)시간" // 오늘, +12시간
+
+    // MARK: - 오전/오후, 시각
   }
 
   func deleteCity(_ index: Int) {
