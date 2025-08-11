@@ -147,9 +147,6 @@ final class StopwatchViewController: UIViewController {
       $0.directionalHorizontalEdges.equalToSuperview().inset(20)
       $0.bottom.equalTo(view.safeAreaLayoutGuide)
     }
-
-    // 임시
-    stopwatchCircleView.setProgress(1, animated: true)
   }
 }
 
@@ -245,6 +242,14 @@ extension StopwatchViewController {
       .bind { [weak self] laps in
         self?.applySnapshot(laps)
       }
+      .disposed(by: disposeBag)
+
+    // 원형 UI Progress
+    viewModel.timePassed
+      .map { [weak self] time in
+        self?.viewModel.circleProgress(time) ?? 0
+      }
+      .bind(to: stopwatchCircleView.rx.progress)
       .disposed(by: disposeBag)
   }
 }

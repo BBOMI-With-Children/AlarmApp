@@ -104,4 +104,9 @@ extension StopwatchViewModel {
 
     return String(format: "%02d:%02d:%02d", minutes, seconds, milliseconds)
   }
+
+  func circleProgress(_ time: TimeInterval) -> CGFloat {
+    let seconds = time - Double(Int(time / 60) * 60) // 전체 경과 시간에서 60초 단위 시간을 빼, 현재 분에서 경과한 초만 구함
+    return CGFloat(seconds / 60.0) // 0.0 ~ 1.0
+  }
 }
