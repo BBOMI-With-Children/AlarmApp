@@ -50,7 +50,8 @@ final class WorldTimeCell: UITableViewCell {
   private let leftStackView = UIStackView().then { // cityLabel + timeDifferenceLabel
     $0.axis = .vertical
     $0.alignment = .leading
-    $0.spacing = 4
+    $0.distribution = .fillProportionally
+    $0.spacing = 2
   }
 
   private let contentStackView = UIStackView().then {
@@ -79,7 +80,7 @@ final class WorldTimeCell: UITableViewCell {
     backgroundColor = UIColor(named: "backgroundColor")
   }
   
-  // MARK: - Private Methods
+  // MARK: - setupUI
   
   private func setupUI() {
     contentView.backgroundColor = UIColor(named: "backgroundColor")
@@ -92,6 +93,8 @@ final class WorldTimeCell: UITableViewCell {
     [cityLabel, timeDifferenceLabel].forEach { leftStackView.addArrangedSubview($0) }
   }
   
+  // MARK: - setupLayout
+
   private func setupLayout() {
     containerView.snp.makeConstraints {
       $0.top.bottom.equalToSuperview().inset(4)
