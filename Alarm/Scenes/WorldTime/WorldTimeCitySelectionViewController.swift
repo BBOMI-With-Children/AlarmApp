@@ -65,6 +65,13 @@ final class WorldTimeCitySelectionViewController: UIViewController {
     bind()
   }
   
+  override func viewWillAppear(_ animated: Bool) {
+    super.viewWillAppear(animated)
+    searchBar.text = nil
+    searchBar.resignFirstResponder() // 키보드 닫기
+    viewModel.filter("")
+  }
+
   // MARK: - setupUI
 
   private func setupUI() {
