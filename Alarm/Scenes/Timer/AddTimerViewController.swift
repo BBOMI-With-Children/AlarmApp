@@ -83,12 +83,7 @@ class AddTimerViewController: UIViewController {
     )
 
     // userDefault에 저장
-    TimerDataManager.shared.addTimter(newItem)
+    TimerDataManager.shared.addTimer(newItem)
     dismiss(animated: true)
-    
-    // var timers = TimerDataManager.shared.loadTimers()
-    // timers.append(newItem)
-    // TimerDataManager.shared.saveTimers(timers)
-    // NotificationCenter.default.post(name: .timerDidAdd, object: newItem)
   }
 }
