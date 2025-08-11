@@ -41,38 +41,24 @@ final class TimerViewController: UIViewController {
     // 타이머(1초마다 이벤트 발생)
     Observable<Int>.interval(.seconds(1), scheduler: MainScheduler.instance)
       .subscribe(onNext: { _ in
-        // 현재 저장된 데이터 조회
-        guard var items = try? TimerDataManager.shared.timers.value() else { return }
-        var changed = false  // 값 변화 추적
-        var finished: [TimerItem] = []  // 0이 된 타이머들
-
-        for i in items.indices {  // 데이터 중
-          if items[i].isActive, items[i].time > 0 {  // 타이머 진행 중 + 시간이 0보다 크면
-            items[i].time -= 1  // 시간 1 감소
-            changed = true  // 값 변화 확인
-
-            if items[i].time == 0 {
-              finished.append(items[i])
+        let finished: [TimerItem] = TimerDataManager.shared.mutate { items in
+          var justFinished: [TimerItem] = []
+          for i in items.indices {
+            if items[i].isActive, items[i].time > 0 {
+              items[i].time -= 1
+              if items[i].time == 0 {
+                justFinished.append(items[i])
+              }
             }
           }
+          if !justFinished.isEmpty {
+            let finishedIds = Set(justFinished.map { $0.id })
+            items.removeAll { finishedIds.contains($0.id) }
+          }
+          return justFinished
         }
-
-        finished.forEach {
-          self.notifyTimerFinished($0)
-        }
-
-        if !finished.isEmpty {
-          let finishiedIds = Set(finished.map { $0.id })
-          items.removeAll { finishiedIds.contains($0.id) }
-          changed = true
-        }
-
-        if changed {  // 변화 감지
-          TimerDataManager.shared.timers.onNext(items)  // 변경된 데이터 전달. 다른 구독자에게 갱신 요청
-          TimerDataManager.shared.saveTimers()  // userDefault 저장
-        }
+        finished.forEach { self.notifyTimerFinished($0) }
       }).disposed(by: disposeBag)
-
     configureUI()
     setupNavigationBar()
   }
@@ -185,17 +171,14 @@ extension TimerViewController: UITableViewDataSource {
 
     cell.onToggleActive = { [weak self] in  // 클로저 설정
       guard let self = self else { return }
-      guard var items = try? TimerDataManager.shared.timers.value() else { return }  // timers 데이터(배열) 조회
-      if let idx = items.firstIndex(where: { $0.id == item.id }) {  // 현재 cell item과 동일한 타이머 인덱스 조회
-        items[idx].isActive.toggle()  // 활성화 토글
-
-        if items[idx].isActive == false {  // 타이머 셀이 일시정지될 때
-          items.sort(by: timerCellSort)  // 짧은 시간 순 정렬
+      TimerDataManager.shared.mutate { items in
+        if let idx = items.firstIndex(where: { $0.id == item.id }) {
+          items[idx].isActive.toggle()
+          if items[idx].isActive == false {
+            items.sort(by: self.timerCellSort)
+          }
         }
-
-        TimerDataManager.shared.timers.onNext(items)  // 변경된 데이터 전달. 다른 구독자에게 갱신 요청
-        TimerDataManager.shared.saveTimers()  // userDefault 저장
-      }
+      }  // timers 데이터(배열) 조회
     }
     return cell
   }

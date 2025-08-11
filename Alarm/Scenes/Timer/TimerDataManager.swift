@@ -10,41 +10,35 @@ import RxSwift
 
 final class TimerDataManager {  // 타이머 데이터 저장/조회
   static let shared = TimerDataManager()
+
+  private var items: [TimerItem] = []  // 데이터 배열
+
+  private let subject = BehaviorSubject<[TimerItem]>(value: [])
+  var timers: Observable<[TimerItem]> { subject.asObservable() }
+
+  private let queue = DispatchQueue(label: "TimerManager.queue")
+
   private init() {}
-  private let key = "savedTimers"
 
-  let timers = BehaviorSubject<[TimerItem]>(value: [])
-
-  func saveTimers() {  // userDefault 전체 배열 저장
-    if let items = try? timers.value(),
-      let data = try? JSONEncoder().encode(items)
-    {
-      UserDefaults.standard.set(data, forKey: key)
+  func loadTimers() {  // 초기 조회
+    queue.sync {
+      self.items = Self.loadFromUserDefaults()
+      self.subject.onNext(self.items)
     }
   }
 
-  func loadTimers() {  // userDefault 조회
-    if let data = UserDefaults.standard.data(forKey: key),
-      let loaded = try? JSONDecoder().decode([TimerItem].self, from: data)
-    {
-      timers.onNext(loaded)
+  private func saveTimers() {
+    Self.saveToUserDefaults(items)
+  }
+
+  @discardableResult
+  func mutate<T>(_ block: (inout [TimerItem]) -> T) -> T {
+    queue.sync {
+      let result = block(&items)
+      subject.onNext(items)
+      saveTimers()
+      return result
     }
-  }
-
-  func addTimer(_ timer: TimerItem) {  // 배열에 데이터 추가
-    var current = (try? timers.value()) ?? []
-    current.append(timer)
-    current = sortTimers(current)
-    timers.onNext(current)
-    saveTimers()
-  }
-
-  func removeTimer(at index: Int) {
-    var current = (try? timers.value()) ?? []
-    guard current.indices.contains(index) else { return }
-    current.remove(at: index)
-    timers.onNext(current)
-    saveTimers()
   }
 
   func sortTimers(_ items: [TimerItem]) -> [TimerItem] {
@@ -54,6 +48,24 @@ final class TimerDataManager {  // 타이머 데이터 저장/조회
       }
       return lhs.time < rhs.time
     }
+  }
+}
+
+extension TimerDataManager {
+  fileprivate static let key = "savedTimers"
+
+  fileprivate static func loadFromUserDefaults() -> [TimerItem] {
+    guard let data = UserDefaults.standard.data(forKey: key),
+      let decoded = try? JSONDecoder().decode([TimerItem].self, from: data)
+    else {
+      return []
+    }
+    return decoded
+  }
+
+  fileprivate static func saveToUserDefaults(_ items: [TimerItem]) {
+    guard let data = try? JSONEncoder().encode(items) else { return }
+    UserDefaults.standard.set(data, forKey: key)
   }
 }
 

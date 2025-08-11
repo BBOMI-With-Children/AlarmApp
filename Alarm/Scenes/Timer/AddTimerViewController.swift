@@ -94,7 +94,9 @@ class AddTimerViewController: UIViewController {
     )
 
     // userDefault에 저장
-    TimerDataManager.shared.addTimer(newItem)
+    TimerDataManager.shared.mutate { items in
+      items.append(newItem)
+    }
     dismiss(animated: true)
   }
 }
