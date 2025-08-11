@@ -3,7 +3,7 @@
 //  Alarm
 //
 //  Created by 서광용 on 8/10/25.
-// DataSource로 구현.  (데이터 변화도 검색말고 없고, 구현 위주라 전통 DataSource가 적합할거라 생각)
+// DataSource로 구현. (데이터 변화도 검색말고 없고, 구현 위주라 기본 제공하는 메서드가 있는 전통 DataSource가 적합할거라 생각해서. ex: sectionForSectionIndexTitle)
 
 import RxCocoa
 import RxSwift
@@ -19,10 +19,7 @@ final class WorldTimeCitySelectionViewController: UIViewController {
   private let backgroundColor = UIColor(named: "backgroundColor")
   private let mainColor = UIColor(named: "mainColor")
   
-  // 더미 데이터 (ViewModel 파일 만들어서 옮길 예정. 테스트 용도)
-  private var dummyCities: [String] = [
-    "서울", "도쿄", "뉴욕", "런던", "파리", "베를린", "시드니", "홍콩", "방콕"
-  ]
+  private let viewModel = WorldTimeCitySelectionViewModel()
   
   private let titleLabel = UILabel().then {
     $0.text = "도시 선택"
@@ -105,6 +102,23 @@ final class WorldTimeCitySelectionViewController: UIViewController {
         vc.dismiss(animated: true)
       }
       .disposed(by: disposeBag)
+    
+    // MARK: - 검색어를 viewModel의 filter에 전달
+    searchBar.rx.text.orEmpty
+      .debounce(.milliseconds(200), scheduler: MainScheduler.instance) // 0.2초동안 멈추면 실행
+      .distinctUntilChanged() // 이전 값과 동일하면 무시
+      .subscribe(with: self) { vc, text in
+        vc.viewModel.filter(text)
+      }
+      .disposed(by: disposeBag)
+    
+    // MARK: - 데이터 변경 시 테이블 갱신
+    viewModel.rows
+      .asDriver(onErrorJustReturn: [])
+      .drive(with: self) { vc, _ in
+        vc.tableView.reloadData()
+      }
+      .disposed(by: disposeBag)
   }
 }
 
@@ -112,16 +126,22 @@ final class WorldTimeCitySelectionViewController: UIViewController {
 
 extension WorldTimeCitySelectionViewController: UITableViewDataSource {
   func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-    return dummyCities.count
+    return viewModel.rows.value.count
   }
 
   func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
     let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
-    cell.textLabel?.text = dummyCities[indexPath.row]
+    let row = viewModel.rows.value[indexPath.row]
+    cell.textLabel?.text = row.displayText
     cell.textLabel?.textColor = .white
     cell.backgroundColor = backgroundColor
     cell.preservesSuperviewLayoutMargins = false // 기본 마진 레이아웃 사용 x
     cell.layoutMargins = .zero
+    
+    // 셀 클릭 시 하이라이트 변경
+    let cellTappedColor = UIView()
+    cellTappedColor.backgroundColor = UIColor(white: 1.0, alpha: 0.15)
+    cell.selectedBackgroundView = cellTappedColor
     return cell
   }
 
