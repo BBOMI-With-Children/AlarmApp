@@ -17,6 +17,7 @@ final class WorldTimeViewController: UIViewController {
   private let backgroundColor = UIColor(named: "backgroundColor")
   private let mainColor = UIColor(named: "mainColor")
 
+  private let citySelectionVC = WorldTimeCitySelectionViewController()
   private let viewModel = WorldTimeViewModel()
 
   private lazy var tableView = UITableView().then {
@@ -97,7 +98,7 @@ final class WorldTimeViewController: UIViewController {
 
     tableView.rx.itemDeleted
       .subscribe(with: self) { vc, indexPath in
-        vc.viewModel.deleteItem(indexPath.row)
+        vc.viewModel.deleteCity(indexPath.row)
       }
       .disposed(by: disposeBag)
 
@@ -106,7 +107,7 @@ final class WorldTimeViewController: UIViewController {
     tableView.rx.itemMoved
       .subscribe(with: self) { vc, move in
         // sourceIndex: 드래그 시작한 셀의 위치, destinationIndex: 드롭 도착한 셀의 위치
-        vc.viewModel.moveItem(fromIndex: move.sourceIndex.row, toIndex: move.destinationIndex.row)
+        vc.viewModel.moveCity(fromIndex: move.sourceIndex.row, toIndex: move.destinationIndex.row)
       }
       .disposed(by: disposeBag)
 
@@ -114,9 +115,16 @@ final class WorldTimeViewController: UIViewController {
 
     addButton.rx.tap
       .subscribe(with: self) { vc, _ in
-        let citySelectionVC = WorldTimeCitySelectionViewController()
-        citySelectionVC.modalPresentationStyle = .automatic // 하단에서 올라오는 카드 형식. 스크롤 가능
-        vc.present(citySelectionVC, animated: true)
+        vc.citySelectionVC.modalPresentationStyle = .automatic
+        vc.present(vc.citySelectionVC, animated: true)
+      }
+      .disposed(by: disposeBag)
+    
+    // MARK: - Modal에서 누른 데이터 받기
+    
+    citySelectionVC.didSelectCity
+      .subscribe(with: self) { vc, row in
+        vc.viewModel.addCity(row)
       }
       .disposed(by: disposeBag)
   }

@@ -118,9 +118,9 @@ final class WorldTimeCell: UITableViewCell {
   
   // MARK: - Configure
 
-  func configure(_ data: testDataModel) {
+  func configure(_ data: WorldTimeItem) {
     cityLabel.text = data.city
-    timeDifferenceLabel.text = data.subInfo
+    timeDifferenceLabel.text = data.gmt
     meridiemLabel.text = data.meridiem
     timeLabel.text = data.time
   }
