@@ -77,9 +77,9 @@ final class WorldTimeViewModel {
   // MARK: - 도시 추가
 
   func addCity(_ row: CityRow) {
-    // 중복 방지(city 기준)
     var items = timesRelay.value
-    if items.contains(where: { $0.city == row.city }) { return }
+    // 중복 방지(timezone 기준)
+    guard !items.contains(where: { $0.timezoneID == row.timezoneID }) else { return }
 
     // MARK: - 표시값 계산 (공통 함수 사용)
 
