@@ -26,6 +26,13 @@ final class TimerViewController: UIViewController {
 
   // 시스템 예약된 알림 추적(중복 방지)
   private var scheduledAlarmIds = Set<UUID>()
+  private var isSwiping = false  // 스와이프 중에 리로드 억제
+
+  // 스와이프 중인 행의 인덱스(필요 시 셀만 부분 업데이트)
+  private var editingIndexPath: IndexPath?
+  // 로컬 삭제 애니메이션을 위해 1회 리로드 억제 플래그
+  private var isLocalDeleting = false
+  private var skipNextReload = false
 
   override func viewDidLoad() {
     super.viewDidLoad()
@@ -46,7 +53,14 @@ final class TimerViewController: UIViewController {
       .observe(on: MainScheduler.instance)
       .subscribe(onNext: { [weak self] items in
         self?.timerItems = items  // 최신 스냅숏 반영
-        self?.timerTableView.reloadData()
+        if self?.skipNextReload == true {
+          // 로컬 삭제 애니메이션 완료까지 1회 리로드 스킵
+          self?.skipNextReload = false
+        } else if self?.isSwiping == false && self?.isLocalDeleting == false {
+          self?.timerTableView.reloadData()
+        } else if self?.isSwiping == true {
+          self?.updateEditingCellDuringSwipe()
+        }
 
         // 활성 타이머에 대해 시스템 알림 예약 동기화
         let active = items.filter { $0.isActive && $0.time > 0 }
@@ -86,7 +100,10 @@ final class TimerViewController: UIViewController {
           if !justFinished.isEmpty {
             let ids = Set(justFinished.map { $0.id })
             // 포그라운드 즉시 배너/사운드 표시를 위해 시스템 예약 알림 취소 후, 항목 제거
-            for id in ids { self.cancelSystemAlarm(forId: id); self.scheduledAlarmIds.remove(id) }
+            for id in ids {
+              self.cancelSystemAlarm(forId: id)
+              self.scheduledAlarmIds.remove(id)
+            }
             // 셀 제거
             items.removeAll { ids.contains($0.id) }
           }
@@ -94,6 +111,8 @@ final class TimerViewController: UIViewController {
         }
         // 포그라운드: 즉시 배너/사운드 표시
         finished.forEach { self.notifyTimerFinished($0) }
+        // 스와이프 중인 셀의 라벨만 부분 갱신하여 타이머가 멈춘 것처럼 보이지 않게 함
+        if self.isSwiping { self.updateEditingCellDuringSwipe() }
       })
       .disposed(by: disposeBag)
     configureUI()
@@ -111,6 +130,7 @@ final class TimerViewController: UIViewController {
 
     view.addSubview(timerTableView)
     timerTableView.dataSource = self
+    timerTableView.delegate = self
     timerTableView.register(TimerTableViewCell.self, forCellReuseIdentifier: TimerTableViewCell.reuseIdentifier)
 
     timerTableView.snp.makeConstraints {
@@ -193,6 +213,16 @@ final class TimerViewController: UIViewController {
       firedIds.forEach { self.scheduledAlarmIds.remove($0) }
     }
   }
+
+  // 스와이프 중엔 전체 리로드 대신 해당 셀만 부분 업데이트(레이아웃 변경 최소화)
+  private func updateEditingCellDuringSwipe() {
+    guard let indexPath = editingIndexPath else { return }
+    guard indexPath.row < timerItems.count else { return }
+    let item = timerItems[indexPath.row]
+    if let cell = timerTableView.cellForRow(at: indexPath) as? TimerTableViewCell {
+      cell.configureUI(with: item)
+    }
+  }
 }
 
 // MARK: - UITableView
@@ -232,6 +262,99 @@ extension TimerViewController: UITableViewDataSource {
     }
     return cell
   }
+
+  func tableView(
+    _ tableView: UITableView,
+    commit editingStyle: UITableViewCell.EditingStyle,
+    forRowAt indexPath: IndexPath
+  ) {
+    if editingStyle == .delete {
+      let item = timerItems[indexPath.row]
+      // 예약 취소 + 추적 정리
+      cancelSystemAlarm(forId: item.id)
+      scheduledAlarmIds.remove(item.id)
+
+      // 스와이프 삭제
+      if indexPath.row < timerItems.count, timerItems[indexPath.row].id == item.id {
+        timerItems.remove(at: indexPath.row)
+        isLocalDeleting = true
+        skipNextReload = true
+        timerTableView.performBatchUpdates(
+          {
+            timerTableView.deleteRows(at: [indexPath], with: .automatic)
+          },
+          completion: { [weak self] _ in
+            self?.isLocalDeleting = false
+          }
+        )
+      }
+
+      TimerDataManager.shared.mutate { items in
+        if let idx = items.firstIndex(where: { $0.id == item.id }) {
+          items.remove(at: idx)
+        }
+      }
+    }
+  }
+}
+
+// MARK: - UITableViewDelegate
+extension TimerViewController: UITableViewDelegate {
+  func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath)
+    -> UISwipeActionsConfiguration?
+  {
+    let deleteAction = UIContextualAction(style: .destructive, title: "삭제") { [weak self] _, _, completion in
+      guard let self = self else {
+        completion(false)
+        return
+      }
+      let item = self.timerItems[indexPath.row]
+
+      // 예약 취소 + 추적 정리
+      self.cancelSystemAlarm(forId: item.id)
+      self.scheduledAlarmIds.remove(item.id)
+
+      // 로컬 데이터 삭제
+      if indexPath.row < self.timerItems.count, self.timerItems[indexPath.row].id == item.id {
+        self.timerItems.remove(at: indexPath.row)
+        self.isLocalDeleting = true
+        self.skipNextReload = true
+        self.timerTableView.performBatchUpdates(
+          {
+            self.timerTableView.deleteRows(at: [indexPath], with: .automatic)
+          },
+          completion: { [weak self] _ in
+            self?.isLocalDeleting = false
+          }
+        )
+      }
+
+      // userDefault 삭제
+      TimerDataManager.shared.mutate { items in
+        if let idx = items.firstIndex(where: { $0.id == item.id }) {
+          items.remove(at: idx)
+        }
+      }
+
+      completion(true)
+    }
+    let config = UISwipeActionsConfiguration(actions: [deleteAction])
+    config.performsFirstActionWithFullSwipe = true
+    return config
+    // return UISwipeActionsConfiguration(actions: [deleteAction])
+  }
+
+  func tableView(_ tableView: UITableView, willBeginEditingRowAt indexPath: IndexPath) {
+    isSwiping = true
+    editingIndexPath = indexPath
+  }
+
+  func tableView(_ tableView: UITableView, didEndEditingRowAt indexPath: IndexPath?) {
+    isSwiping = false
+    editingIndexPath = nil
+    timerTableView.reloadData()
+  }
+
 }
 
 extension TimerViewController: UNUserNotificationCenterDelegate {
