@@ -23,7 +23,7 @@ final class WorldTimeCell: UITableViewCell {
   /*
    ┌────────────────────────────────────┐
    |  [도시명]                            |
-   | -----------------------------------|
+   | ---------------------------------- |
    |  [GMT/날짜정보] |  [오전/오후] | [시간]  |
    └────────────────────────────────────┘
    */
@@ -111,7 +111,7 @@ final class WorldTimeCell: UITableViewCell {
     }
     
     timeLabel.snp.makeConstraints {
-      $0.trailing.equalToSuperview()
+      $0.trailing.equalTo(contentStackView.layoutMarginsGuide.snp.trailing)
       $0.centerY.equalToSuperview()
     }
   }
