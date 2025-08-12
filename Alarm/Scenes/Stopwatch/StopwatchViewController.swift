@@ -29,7 +29,7 @@ final class StopwatchViewController: UIViewController {
   // 시간 레이블
   private let timeLabel = UILabel().then {
     $0.text = "00:00:00"
-    $0.font = .monospacedDigitSystemFont(ofSize: 36, weight: .bold)
+    $0.font = .monospacedDigitSystemFont(ofSize: 36, weight: .medium)
     $0.textColor = .white
     $0.textAlignment = .center
   }
@@ -53,7 +53,7 @@ final class StopwatchViewController: UIViewController {
   }()
 
   // 컬렉션 뷰 데이터 소스
-  private var dataSource: UICollectionViewDiffableDataSource<Int, LapTime>!
+  private var dataSource: UICollectionViewDiffableDataSource<Int, StopWatchModel.Lap>!
 
   // 랩,재설정 버튼
   private let lapResetButton = UIButton().then {
@@ -154,11 +154,11 @@ final class StopwatchViewController: UIViewController {
 
 extension StopwatchViewController {
   // 컬렉션뷰에 데이터를 적용하는 함수
-  private func applySnapshot(_ laps: [LapTime]) {
+  private func applySnapshot(_ laps: [StopWatchModel.Lap]) {
     // 1. DiffableDataSource에서 사용할 스냅샷 생성
     //    제네릭: <SectionIdentifierType, ItemIdentifierType>
     //    여기서는 섹션을 Int로, 아이템을 LapTime으로 식별
-    var snapshot = NSDiffableDataSourceSnapshot<Int, LapTime>()
+    var snapshot = NSDiffableDataSourceSnapshot<Int, StopWatchModel.Lap>()
     // 2. 섹션 추가 (여기서는 단일 섹션 0번)
     snapshot.appendSections([0])
     // 3. 아이템을 섹션에 추가
@@ -169,7 +169,7 @@ extension StopwatchViewController {
 
   // DiffableDataSource를 생성하는 함수
   private func configureDataSource() {
-    dataSource = UICollectionViewDiffableDataSource<Int, LapTime>(collectionView: collectionView) { [weak self] collectionView, indexPath, lap in
+    dataSource = UICollectionViewDiffableDataSource<Int, StopWatchModel.Lap>(collectionView: collectionView) { [weak self] collectionView, indexPath, lap in
       guard let self = self,
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: LapCollectionViewCell.reuseIdentifier, for: indexPath) as? LapCollectionViewCell
       else {

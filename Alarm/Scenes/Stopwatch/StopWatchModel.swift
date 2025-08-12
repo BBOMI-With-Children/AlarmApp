@@ -7,8 +7,15 @@
 
 import Foundation
 
-struct LapTime: Hashable {
-  let id = UUID()
-  let number: Int
-  let time: TimeInterval
+struct StopWatchModel: Codable, Hashable {
+  struct Lap: Codable, Hashable {
+    let number: Int
+    let time: TimeInterval
+  }
+
+  var isRunning: Bool
+  var startDate: Date?
+  var totalTime: TimeInterval
+  var lastLapTotalTime: TimeInterval
+  var laps: [Lap]
 }
