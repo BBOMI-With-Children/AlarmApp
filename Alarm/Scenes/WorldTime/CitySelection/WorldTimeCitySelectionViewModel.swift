@@ -83,11 +83,11 @@ final class WorldTimeCitySelectionViewModel {
   // MARK: - 서치바 검색 기능
   
   func filter(_ keyword: String) {
-    guard !keyword.isEmpty else { return rows.accept(all) }
+    guard !keyword.isEmpty else { return sections.accept(group(all)) }
     let k = keyword.lowercased() // 소문자
     // 입력한 소문자(k)가 포함되는지 필터링
     let filtered = all.filter { $0.city.lowercased().contains(k) || $0.continent.lowercased().contains(k) }
-    rows.accept(filtered) // 검색한걸로 rows 변경
+    sections.accept(group(filtered)) // 검색하여 sections 변경
   }
   
   // MARK: - 도시 이름

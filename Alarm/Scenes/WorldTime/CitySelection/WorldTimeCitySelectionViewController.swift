@@ -124,7 +124,7 @@ final class WorldTimeCitySelectionViewController: UIViewController {
     
     // MARK: - 데이터 변경 시 테이블 갱신
 
-    viewModel.rows
+    viewModel.sections // sections를 기준으로 변경 감지
       .asDriver(onErrorJustReturn: [])
       .drive(with: self) { vc, _ in
         vc.tableView.reloadData()
