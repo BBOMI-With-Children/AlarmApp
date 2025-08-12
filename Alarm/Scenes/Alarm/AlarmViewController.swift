@@ -31,6 +31,8 @@ final class AlarmViewController: UIViewController {
     tableView.register(AlarmCell.self, forCellReuseIdentifier: AlarmCell.id)
     view.addSubview(tableView)
 
+    tableView.rx.setDelegate(self).disposed(by: disposeBag)
+
     // MARK: - 네비게이션 바 설정
 
     title = "알람"
@@ -130,6 +132,18 @@ final class AlarmViewController: UIViewController {
         AlarmManager.shared.remove(at: indexPath.row)
       })
       .disposed(by: disposeBag)
+  }
+}
+
+extension AlarmViewController: UITableViewDelegate {
+  func tableView(_ tableView: UITableView,
+                 trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration?
+  {
+    let delete = UIContextualAction(style: .destructive, title: "삭제") { _, _, completion in
+      AlarmManager.shared.remove(at: indexPath.row)
+      completion(true)
+    }
+    return UISwipeActionsConfiguration(actions: [delete])
   }
 }
 
