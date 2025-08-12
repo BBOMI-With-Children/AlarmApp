@@ -7,13 +7,13 @@
 
 import Foundation
 
-struct Alarm: Codable, Equatable {
-  var id: UUID = .init() // 알람 식별자 (저장/불러오기 할 때 복원 가능하도록 var로 선언)
+struct Alarm: Codable, Equatable, Identifiable {
+  let id: UUID
   var time: String // 알람 시간
   var subtitle: String // 반복 주기
   var isOn: Bool // 알람 ON/OFF
 
-  init(id: UUID = .init(), time: String, subtitle: String, isOn: Bool) {
+  init(id: UUID = UUID(), time: String, subtitle: String, isOn: Bool) {
     self.id = id
     self.time = time
     self.subtitle = subtitle
