@@ -9,23 +9,6 @@ import SnapKit
 import Then
 import UIKit
 
-enum Weekday: Int, CaseIterable {
-  case mon = 0, tue, wed, thu, fri, sat, sun
-  var shortKo: String {
-    switch self {
-    case .mon: return "월"; case .tue: return "화"; case .wed: return "수"
-    case .thu: return "목"; case .fri: return "금"; case .sat: return "토"; case .sun: return "일"
-    }
-  }
-
-  var fullKo: String {
-    switch self {
-    case .mon: return "월요일"; case .tue: return "화요일"; case .wed: return "수요일"
-    case .thu: return "목요일"; case .fri: return "금요일"; case .sat: return "토요일"; case .sun: return "일요일"
-    }
-  }
-}
-
 final class WeekdaySelectorView: UIView {
   // 외부 API
   var selectedDays: Set<Weekday> = [] { didSet { updateAll() } }
@@ -34,7 +17,7 @@ final class WeekdaySelectorView: UIView {
   // 색상
   private let mainColor = UIColor(named: "mainColor") ?? .systemBlue
   private let modalColor = UIColor(named: "modalColor") ?? .tertiarySystemFill
-  private let sectionColor = UIColor(named: "SectionColor") ?? .label
+  private let sectionColor = UIColor(named: "sectionColor") ?? .label
 
   // 레이아웃 파라미터
   private let horizontalInset: CGFloat = 12
@@ -89,7 +72,7 @@ final class WeekdaySelectorView: UIView {
 
       // width/height 제약 저장해두고 나중에 업데이트
       button.snp.makeConstraints { make in
-        sizeConstraints.append(make.width.equalTo(preferredSize).constraint)
+        sizeConstraints.append(make.width.equalTo(preferredSize).constraint) // width만 나중에 업데이트
         make.height.equalTo(preferredSize)
       }
 
@@ -151,8 +134,9 @@ final class WeekdaySelectorView: UIView {
 
   private func updateAll() {
     for (i, b) in buttons.enumerated() {
-      let day = Weekday(rawValue: i)!
-      update(button: b, selected: selectedDays.contains(day))
+      if let day = Weekday(rawValue: i) {
+        update(button: b, selected: selectedDays.contains(day))
+      }
     }
   }
 

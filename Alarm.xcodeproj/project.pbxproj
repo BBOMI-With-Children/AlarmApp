@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		817145E62E49D8B800A79E75 /* radial.caf in Resources */ = {isa = PBXBuildFile; fileRef = 817145E52E49D8B800A79E75 /* radial.caf */; };
 		E81B23772E41F9890038B490 /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = E81B23762E41F9890038B490 /* SnapKit */; };
 		E81B237A2E41F9930038B490 /* Then in Frameworks */ = {isa = PBXBuildFile; productRef = E81B23792E41F9920038B490 /* Then */; };
 		E81B24172E41F9D00038B490 /* RxBlocking in Frameworks */ = {isa = PBXBuildFile; productRef = E81B24162E41F9D00038B490 /* RxBlocking */; };
@@ -17,7 +16,6 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		817145E52E49D8B800A79E75 /* radial.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = radial.caf; sourceTree = "<group>"; };
 		E81B21D82E4105870038B490 /* Alarm.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Alarm.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -62,7 +60,6 @@
 		E81B21CF2E4105870038B490 = {
 			isa = PBXGroup;
 			children = (
-				817145E52E49D8B800A79E75 /* radial.caf */,
 				E81B21DA2E4105870038B490 /* Alarm */,
 				E81B21D92E4105870038B490 /* Products */,
 			);
@@ -154,7 +151,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				817145E62E49D8B800A79E75 /* radial.caf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -178,7 +174,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = Y774295X22;
+				DEVELOPMENT_TEAM = 6DA7CAGY3R;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Alarm/Resources/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -210,7 +206,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = Y774295X22;
+				DEVELOPMENT_TEAM = 6DA7CAGY3R;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Alarm/Resources/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
