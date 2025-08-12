@@ -96,10 +96,10 @@ class TimerTableViewCell: UITableViewCell {
   func configureUI(with item: TimerItem) {
     timerLabel.text = formattedTime(item.time)
     userLabel.text = "\(item.label)"
-    button // 활성 상태에 따른 아이콘 토글
+    button  // 활성 상태에 따른 아이콘 토글
       .setImage(item.isActive ? UIImage(systemName: "pause.fill") : UIImage(systemName: "play.fill"), for: .normal)
-    button.removeTarget(nil, action: nil, for: .allEvents) // 재사용된 cell에서 중복 실행 방지를 위한 target remove
-    button.addTarget(self, action: #selector(toggleActive), for: .touchUpInside) // 아이콘 토글
+    button.removeTarget(nil, action: nil, for: .allEvents)  // 재사용된 cell에서 중복 실행 방지를 위한 target remove
+    button.addTarget(self, action: #selector(toggleActive), for: .touchUpInside)  // 아이콘 토글
   }
 
   private func formattedTime(_ interval: TimeInterval) -> String {
@@ -111,6 +111,6 @@ class TimerTableViewCell: UITableViewCell {
   }
 
   @objc private func toggleActive() {
-    onToggleActive?() // onToggleActive 호출
+    onToggleActive?()  // onToggleActive 호출
   }
 }
