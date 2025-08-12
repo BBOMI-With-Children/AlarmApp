@@ -5,9 +5,9 @@
 //  Created by 노가현 on 8/11/25.
 //
 
-import UIKit
 import SnapKit
 import Then
+import UIKit
 
 final class AlarmCell: UITableViewCell {
   static let id = "AlarmCell"
