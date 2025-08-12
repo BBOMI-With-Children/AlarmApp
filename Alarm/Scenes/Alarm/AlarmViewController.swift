@@ -105,6 +105,13 @@ final class AlarmViewController: UIViewController {
         let editor = AlarmEditViewController(mode: .edit(alarm))
         editor.onSave = { AlarmManager.shared.update($0) }
 
+        // 삭제 콜백 id로 찾아서 제거
+        editor.onDelete = { id in
+          if let idx = AlarmManager.shared.alarms.value.firstIndex(where: { $0.id == id }) {
+            AlarmManager.shared.remove(at: idx)
+          }
+        }
+
         let nav = UINavigationController(rootViewController: editor)
         nav.modalPresentationStyle = .pageSheet // 모달 시트
         if let sheet = nav.sheetPresentationController {
