@@ -10,7 +10,7 @@ import RxCocoa
 import RxSwift
 
 final class StopwatchViewModel {
-  private let stopwatchUserDefaluts = StopWatchUserDefaults()
+  private let stopwatchUserDefaults = StopWatchUserDefaults()
   // 현재 타이머가 실행 중인지 알려주는 상태 (true: 실행중, false: 멈춤)
   let isRunning = BehaviorRelay<Bool>(value: false)
   // 스톱워치가 시작된 이후 경과된 시간 (TimeInterval은 초 단위: Double 타입)
