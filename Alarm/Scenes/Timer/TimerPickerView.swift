@@ -145,9 +145,9 @@ extension TimerPickerView: UIPickerViewDelegate, UIPickerViewDataSource {
 
   func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
     switch component {
-    case 0: return "\(hours[row])"
-    case 1: return "\(minutes[row])"
-    case 2: return "\(seconds[row])"
+    case 0: return "\(hours[row]) 시간"
+    case 1: return "\(minutes[row]) 분"
+    case 2: return "\(seconds[row]) 초"
     default: return nil
     }
   }
