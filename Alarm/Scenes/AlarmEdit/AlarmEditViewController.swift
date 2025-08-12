@@ -103,6 +103,7 @@ final class AlarmEditViewController: UIViewController {
 
   override func viewDidLoad() {
     super.viewDidLoad()
+    overrideUserInterfaceStyle = .dark
 
     view.backgroundColor = UIColor(named: "backgroundColor")
     title = "알람 편집"
