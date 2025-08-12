@@ -81,9 +81,38 @@ final class AlarmViewController: UIViewController {
     // MARK: - + 버튼 탭 시 알람 추가
 
     addButton.rx.tap
-      .subscribe(onNext: {
-        let new = Alarm(time: "오전 6:00", subtitle: "주중", isOn: true) // 더미
-        AlarmManager.shared.add(new)
+      .subscribe(onNext: { [weak self] in
+        guard let self else { return }
+        let editor = AlarmEditViewController(mode: .create)
+        editor.onSave = { AlarmManager.shared.add($0) }
+
+        let nav = UINavigationController(rootViewController: editor)
+        nav.modalPresentationStyle = .pageSheet // 모달 시트
+        if let sheet = nav.sheetPresentationController {
+          sheet.detents = [.large()]
+          sheet.prefersGrabberVisible = true
+          sheet.preferredCornerRadius = 12
+        }
+        self.present(nav, animated: true)
+      })
+      .disposed(by: disposeBag)
+
+    // MARK: - 셀 탭 시 편집 모달
+
+    tableView.rx.modelSelected(Alarm.self)
+      .subscribe(onNext: { [weak self] alarm in
+        guard let self else { return }
+        let editor = AlarmEditViewController(mode: .edit(alarm))
+        editor.onSave = { AlarmManager.shared.update($0) }
+
+        let nav = UINavigationController(rootViewController: editor)
+        nav.modalPresentationStyle = .pageSheet // 모달 시트
+        if let sheet = nav.sheetPresentationController {
+          sheet.detents = [.large()]
+          sheet.prefersGrabberVisible = true
+          sheet.preferredCornerRadius = 12
+        }
+        self.present(nav, animated: true)
       })
       .disposed(by: disposeBag)
 
@@ -94,5 +123,13 @@ final class AlarmViewController: UIViewController {
         AlarmManager.shared.remove(at: indexPath.row)
       })
       .disposed(by: disposeBag)
+  }
+}
+
+// 모달에 네비 바 붙여서 보여주기
+private extension UIViewController {
+  func wrapInNav() -> UIViewController {
+    if self is UINavigationController { return self }
+    return UINavigationController(rootViewController: self)
   }
 }
