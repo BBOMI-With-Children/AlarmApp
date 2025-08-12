@@ -6,6 +6,8 @@
 //
 
 import UIKit
+import SnapKit
+import Then
 
 final class AlarmCell: UITableViewCell {
   static let id = "AlarmCell"
@@ -63,33 +65,47 @@ final class AlarmCell: UITableViewCell {
     contentView.backgroundColor = .clear
     selectionStyle = .none
 
-    cardView.backgroundColor = UIColor(named: "sectionColor")
-    cardView.layer.cornerRadius = 18
-    cardView.layer.masksToBounds = true
+    cardView.do {
+      $0.backgroundColor = UIColor(named: "sectionColor")
+      $0.layer.cornerRadius = 18
+      $0.layer.masksToBounds = true
+    }
 
-    titleStack.axis = .horizontal
-    titleStack.alignment = .firstBaseline
-    titleStack.spacing = 8
+    titleStack.do {
+      $0.axis = .horizontal
+      $0.alignment = .firstBaseline
+      $0.spacing = 8
+    }
 
-    labelsVStack.axis = .vertical
-    labelsVStack.alignment = .leading
-    labelsVStack.spacing = 4
+    labelsVStack.do {
+      $0.axis = .vertical
+      $0.alignment = .leading
+      $0.spacing = 4
+    }
 
-    ampmLabel.font = .systemFont(ofSize: 14, weight: .semibold)
-    ampmLabel.textColor = .secondaryLabel
-    ampmLabel.setContentHuggingPriority(.required, for: .horizontal)
-    ampmLabel.setContentCompressionResistancePriority(.required, for: .horizontal)
+    ampmLabel.do {
+      $0.font = .systemFont(ofSize: 14, weight: .semibold)
+      $0.textColor = .secondaryLabel
+      $0.setContentHuggingPriority(.required, for: .horizontal)
+      $0.setContentCompressionResistancePriority(.required, for: .horizontal)
+    }
 
-    timeLabel.font = .systemFont(ofSize: 32, weight: .regular)
-    timeLabel.textColor = .label
-    timeLabel.setContentCompressionResistancePriority(.required, for: .horizontal)
+    timeLabel.do {
+      $0.font = .systemFont(ofSize: 32, weight: .regular)
+      $0.textColor = .label
+      $0.setContentCompressionResistancePriority(.required, for: .horizontal)
+    }
 
-    subtitleLabel.font = .systemFont(ofSize: 14, weight: .semibold)
-    subtitleLabel.textColor = UIColor(named: "mainColor") ?? .systemBlue
-    subtitleLabel.numberOfLines = 1
+    subtitleLabel.do {
+      $0.font = .systemFont(ofSize: 14, weight: .semibold)
+      $0.textColor = UIColor(named: "mainColor") ?? .systemBlue
+      $0.numberOfLines = 1
+    }
 
-    toggleSwitch.onTintColor = UIColor(named: "mainColor") ?? .systemBlue
-    toggleSwitch.addTarget(self, action: #selector(onSwitchChanged), for: .valueChanged)
+    toggleSwitch.do {
+      $0.onTintColor = UIColor(named: "mainColor") ?? .systemBlue
+      $0.addTarget(self, action: #selector(onSwitchChanged), for: .valueChanged)
+    }
 
     contentView.addSubview(cardView)
     [labelsVStack, toggleSwitch].forEach { cardView.addSubview($0) }
@@ -101,29 +117,32 @@ final class AlarmCell: UITableViewCell {
   }
 
   private func setupLayout() {
-    [cardView, labelsVStack, toggleSwitch].forEach { $0.translatesAutoresizingMaskIntoConstraints = false }
+    // 첫 번째 베이스라인 정렬
+    ampmLabel.snp.makeConstraints { make in
+      make.firstBaseline.equalTo(timeLabel.snp.firstBaseline)
+    }
 
-    let baselineConstraint = ampmLabel.firstBaselineAnchor.constraint(equalTo: timeLabel.firstBaselineAnchor)
-    baselineConstraint.priority = .required
-    baselineConstraint.isActive = true
+    // 카드 패딩
+    cardView.snp.makeConstraints { make in
+      make.top.equalTo(contentView.snp.top).offset(6)
+      make.bottom.equalTo(contentView.snp.bottom).inset(6)
+      make.leading.equalTo(contentView.snp.leading).offset(16)
+      make.trailing.equalTo(contentView.snp.trailing).inset(16)
+    }
 
-    NSLayoutConstraint.activate([
-      // 카드 패딩
-      cardView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 6),
-      cardView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -6),
-      cardView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
-      cardView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+    // 레이블 스택 패딩
+    labelsVStack.snp.makeConstraints { make in
+      make.top.equalTo(cardView.snp.top).offset(12)
+      make.leading.equalTo(cardView.snp.leading).offset(20)
+      make.bottom.equalTo(cardView.snp.bottom).inset(12)
+      make.trailing.lessThanOrEqualTo(toggleSwitch.snp.leading).offset(-12)
+    }
 
-      // 레이블 스택 패딩
-      labelsVStack.topAnchor.constraint(equalTo: cardView.topAnchor, constant: 12),
-      labelsVStack.leadingAnchor.constraint(equalTo: cardView.leadingAnchor, constant: 20),
-      labelsVStack.bottomAnchor.constraint(equalTo: cardView.bottomAnchor, constant: -12),
-      labelsVStack.trailingAnchor.constraint(lessThanOrEqualTo: toggleSwitch.leadingAnchor, constant: -12),
-
-      // 스위치
-      toggleSwitch.centerYAnchor.constraint(equalTo: cardView.centerYAnchor),
-      toggleSwitch.trailingAnchor.constraint(equalTo: cardView.trailingAnchor, constant: -20)
-    ])
+    // 스위치
+    toggleSwitch.snp.makeConstraints { make in
+      make.centerY.equalTo(cardView.snp.centerY)
+      make.trailing.equalTo(cardView.snp.trailing).inset(20)
+    }
   }
 
   @objc private func onSwitchChanged() {

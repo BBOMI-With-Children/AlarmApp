@@ -5,6 +5,8 @@
 //  Created by 노가현 on 8/12/25.
 //
 
+import SnapKit
+import Then
 import UIKit
 
 final class AlarmEditViewController: UIViewController {
@@ -15,23 +17,40 @@ final class AlarmEditViewController: UIViewController {
 
   // MARK: - UI
 
-  private let datePicker: UIDatePicker = {
-    let p = UIDatePicker()
-    p.datePickerMode = .time
-    p.preferredDatePickerStyle = .wheels // 휠
-    p.minuteInterval = 1
-    p.locale = Locale(identifier: "en_US_POSIX") // AM/PM 휠 보이도록 고정
-    p.translatesAutoresizingMaskIntoConstraints = false
+  private let datePicker = UIDatePicker().then {
+    $0.datePickerMode = .time
+    $0.preferredDatePickerStyle = .wheels
+    $0.minuteInterval = 1
+    $0.locale = Locale(identifier: "en_US_POSIX") // AM/PM
+    $0.setValue(UIColor.white, forKey: "textColor")
+  }
 
-    p.setValue(UIColor.white, forKey: "textColor")
-    return p
-  }()
+  // 요일 선택 뷰
+  private let weekdayView = WeekdaySelectorView()
+
+  private lazy var cancelButton = UIButton(type: .system).then {
+    var cfg = UIButton.Configuration.plain()
+    cfg.title = "취소"
+    cfg.contentInsets = .init(top: 10, leading: 0, bottom: 0, trailing: 0)
+    $0.configuration = cfg
+    $0.addTarget(self, action: #selector(cancelTapped), for: .touchUpInside)
+    $0.tintColor = UIColor(named: "mainColor")
+  }
+
+  private lazy var saveButton = UIButton(type: .system).then {
+    var cfg = UIButton.Configuration.plain()
+    cfg.title = "저장"
+    cfg.contentInsets = .init(top: 10, leading: 0, bottom: 0, trailing: 0)
+    $0.configuration = cfg
+    $0.addTarget(self, action: #selector(saveTapped), for: .touchUpInside)
+    $0.tintColor = UIColor(named: "mainColor")
+  } 
 
   // MARK: - Formatters
 
   private lazy var outputFormatter: DateFormatter = {
     let f = DateFormatter()
-    f.locale = Locale(identifier: "ko_KR") // 저장은 "오전/오후 h:mm"
+    f.locale = Locale(identifier: "ko_KR") // 오전/오후 h:mm
     f.dateFormat = "a h:mm"
     return f
   }()
@@ -68,44 +87,11 @@ final class AlarmEditViewController: UIViewController {
     view.backgroundColor = UIColor(named: "backgroundColor") ?? .systemBackground
     title = "알람 편집"
 
-    // 좌/우 버튼
-    let left = UIButton(type: .system)
-    var leftConfig = UIButton.Configuration.plain()
-    leftConfig.title = "취소"
-    leftConfig.contentInsets = NSDirectionalEdgeInsets(top: 10, leading: 0, bottom: 0, trailing: 0)
-    left.configuration = leftConfig
-    left.addTarget(self, action: #selector(cancelTapped), for: .touchUpInside)
+    navigationItem.leftBarButtonItem = UIBarButtonItem(customView: cancelButton)
+    navigationItem.rightBarButtonItem = UIBarButtonItem(customView: saveButton)
 
-    let right = UIButton(type: .system)
-    var rightConfig = UIButton.Configuration.plain()
-    rightConfig.title = "저장"
-    rightConfig.contentInsets = NSDirectionalEdgeInsets(top: 10, leading: 0, bottom: 0, trailing: 0)
-    right.configuration = rightConfig
-    right.addTarget(self, action: #selector(saveTapped), for: .touchUpInside)
-
-    if let main = UIColor(named: "mainColor") {
-      left.tintColor = main
-      right.tintColor = main
-    }
-    navigationItem.leftBarButtonItem = UIBarButtonItem(customView: left)
-    navigationItem.rightBarButtonItem = UIBarButtonItem(customView: right)
-
-    // 시간 휠 배치 (상단바 바로 아래)
-    view.addSubview(datePicker)
-    NSLayoutConstraint.activate([
-      datePicker.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 8),
-      datePicker.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-      datePicker.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-      datePicker.heightAnchor.constraint(equalToConstant: 216) // iOS 기본 휠 높이로
-    ])
-
-    // 편집 모드면 기존 값으로 프리셋
-    if case let .edit(alarm) = mode {
-      if let d = parseDisplayTime(alarm.time) {
-        // 날짜의 시/분만 맞추고, 날짜는 오늘로 (날짜 Todo)
-        datePicker.setDate(d, animated: false)
-      }
-    }
+    setupLayout()
+    presetIfEditing()
   }
 
   override func viewWillAppear(_ animated: Bool) {
@@ -113,20 +99,47 @@ final class AlarmEditViewController: UIViewController {
 
     // 네비게이션 바 appearance
     let bg = UIColor(named: "backgroundColor") ?? .systemBackground
-    let appearance = UINavigationBarAppearance()
-    appearance.configureWithOpaqueBackground()
-    appearance.backgroundColor = bg
-    appearance.titleTextAttributes = [
-      .font: UIFont.systemFont(ofSize: 17, weight: .semibold),
-      .foregroundColor: UIColor.white
-    ]
-    appearance.titlePositionAdjustment = UIOffset(horizontal: 0, vertical: 10)
+    let appearance = UINavigationBarAppearance().then {
+      $0.configureWithOpaqueBackground()
+      $0.backgroundColor = bg
+      $0.titleTextAttributes = [
+        .font: UIFont.systemFont(ofSize: 17, weight: .semibold),
+        .foregroundColor: UIColor.white
+      ]
+      $0.titlePositionAdjustment = UIOffset(horizontal: 0, vertical: 10)
+    }
 
-    if let navBar = navigationController?.navigationBar {
-      navBar.standardAppearance = appearance
-      navBar.scrollEdgeAppearance = appearance
-      navBar.compactAppearance = appearance
-      navBar.tintColor = UIColor(named: "mainColor")
+    navigationController?.navigationBar.do {
+      $0.standardAppearance = appearance
+      $0.scrollEdgeAppearance = appearance
+      $0.compactAppearance = appearance
+      $0.tintColor = UIColor(named: "mainColor")
+    }
+  }
+
+  // MARK: - Layout
+
+  private func setupLayout() {
+    view.addSubview(datePicker)
+    view.addSubview(weekdayView)
+
+    datePicker.snp.makeConstraints {
+      $0.top.equalTo(view.safeAreaLayoutGuide).offset(8)
+      $0.leading.trailing.equalToSuperview()
+      $0.height.equalTo(216) // iOS 기본 휠 높이로
+    }
+
+    weekdayView.snp.makeConstraints {
+      $0.top.equalTo(datePicker.snp.bottom).offset(24)
+      $0.leading.trailing.equalToSuperview()
+    }
+  }
+
+  private func presetIfEditing() {
+    if case let .edit(alarm) = mode,
+       let d = parseDisplayTime(alarm.time)
+    {
+      datePicker.setDate(d, animated: false)
     }
   }
 
@@ -135,17 +148,19 @@ final class AlarmEditViewController: UIViewController {
   @objc private func cancelTapped() { dismiss(animated: true) }
 
   @objc private func saveTapped() {
-    // 휠에서 고른 시간을 오전/오후 h:mm으로 변환
     let display = outputFormatter.string(from: datePicker.date)
+    let subtitle = subtitleFromSelectedDays()
 
     switch mode {
     case .create:
-      let new = Alarm(time: display, subtitle: "주중", isOn: true)
+      let subtitle = subtitleFromSelectedDays()
+      let new = Alarm(time: display, subtitle: subtitle.isEmpty ? "주중" : subtitle, isOn: true)
       onSave?(new)
 
     case let .edit(old):
       var updated = old
       updated.time = display
+      updated.subtitle = subtitle
       if updated == old {
         showNoChangesAlert()
         return
@@ -153,6 +168,34 @@ final class AlarmEditViewController: UIViewController {
       onSave?(updated)
     }
     dismiss(animated: true)
+  }
+
+  // 선택 요일을 문자열로
+  private func subtitleFromSelectedDays() -> String {
+    let selected: Set<Weekday> = Set(weekdayView.selectedDays)
+    let count = selected.count
+
+    let weekdays: Set<Weekday> = [.mon, .tue, .wed, .thu, .fri]
+    let weekend: Set<Weekday> = [.sat, .sun]
+
+    // 0개 → 오늘
+    if count == 0 { return "오늘" }
+
+    // 월~금만 선택 → 주중
+    if selected == weekdays { return "주중" }
+
+    // 토/일만 선택 → 주말
+    if selected == weekend { return "주말" }
+
+    // 1개 → <요일>마다
+    if count == 1 {
+      let one = selected.first!
+      return "\(one.fullKo)마다"
+    }
+
+    // 여러 개 → 목, 금
+    let ordered = Weekday.allCases.filter { selected.contains($0) }
+    return ordered.map { $0.shortKo }.joined(separator: ", ")
   }
 
   private func showNoChangesAlert() {
@@ -163,13 +206,15 @@ final class AlarmEditViewController: UIViewController {
 
   // MARK: - Helpers
 
-  // 오전 7:00, AM 7:00 문자열을 Date로 파싱
+  // 오전 7:00 / AM 7:00 문자열 → 오늘 날짜 시/분만 덮은 Date
   private func parseDisplayTime(_ s: String) -> Date? {
     if let d = parserKO.date(from: s) ?? parserEN.date(from: s) {
-      // 오늘 날짜에 시/분만 덮어쓰기
       let cal = Calendar.current
       let comps = cal.dateComponents([.hour, .minute], from: d)
-      return cal.date(bySettingHour: comps.hour ?? 0, minute: comps.minute ?? 0, second: 0, of: Date())
+      return cal.date(bySettingHour: comps.hour ?? 0,
+                      minute: comps.minute ?? 0,
+                      second: 0,
+                      of: Date())
     }
     return nil
   }
