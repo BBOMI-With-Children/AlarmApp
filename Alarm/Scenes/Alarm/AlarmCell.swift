@@ -51,6 +51,8 @@ final class AlarmCell: UITableViewCell {
 
     subtitleLabel.text = alarm.subtitle
     toggleSwitch.isOn = alarm.isOn
+
+    contentView.alpha = alarm.isOn ? 1.0 : 0.5
   }
 
   override func prepareForReuse() {
