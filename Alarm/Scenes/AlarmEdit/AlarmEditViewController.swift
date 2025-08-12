@@ -14,6 +14,7 @@ final class AlarmEditViewController: UIViewController {
   enum Mode { case create, edit(Alarm) }
 
   var onSave: ((Alarm) -> Void)?
+  var onDelete: ((UUID) -> Void)?
   private let mode: Mode
 
   // MARK: - UI
@@ -102,6 +103,7 @@ final class AlarmEditViewController: UIViewController {
 
   override func viewDidLoad() {
     super.viewDidLoad()
+    overrideUserInterfaceStyle = .dark
 
     view.backgroundColor = UIColor(named: "backgroundColor")
     title = "알람 편집"
@@ -260,20 +262,23 @@ final class AlarmEditViewController: UIViewController {
     }
 
     // 삭제하기 버튼
-    view.addSubview(deleteButton)
-    deleteButton.do {
-      $0.setTitle("삭제하기", for: .normal)
-      $0.setTitleColor(.systemRed, for: .normal)
-      $0.backgroundColor = UIColor(named: "modalColor")
-      $0.layer.cornerRadius = 14
-      $0.layer.masksToBounds = true
-    }
+    if case .edit = mode {
+      view.addSubview(deleteButton)
+      deleteButton.do {
+        $0.setTitle("삭제하기", for: .normal)
+        $0.setTitleColor(.systemRed, for: .normal)
+        $0.backgroundColor = UIColor(named: "modalColor")
+        $0.layer.cornerRadius = 14
+        $0.layer.masksToBounds = true
+        $0.addTarget(self, action: #selector(deleteTapped), for: .touchUpInside)
+      }
 
-    deleteButton.snp.makeConstraints {
-      $0.top.equalTo(sectionView.snp.bottom).offset(20)
-      $0.leading.trailing.equalToSuperview().inset(16)
-      $0.height.equalTo(46)
-      $0.bottom.lessThanOrEqualTo(view.safeAreaLayoutGuide).inset(12)
+      deleteButton.snp.makeConstraints {
+        $0.top.equalTo(sectionView.snp.bottom).offset(20)
+        $0.leading.trailing.equalToSuperview().inset(16)
+        $0.height.equalTo(46)
+        $0.bottom.lessThanOrEqualTo(view.safeAreaLayoutGuide).inset(12)
+      }
     }
   }
 
@@ -314,6 +319,19 @@ final class AlarmEditViewController: UIViewController {
       onSave?(updated) // AlarmManager
     }
     dismiss(animated: true)
+  }
+
+  @objc private func deleteTapped() {
+    guard case let .edit(alarm) = mode else { return }
+    let alert = UIAlertController(title: "알람 삭제",
+                                  message: "이 알람을 삭제할까요?",
+                                  preferredStyle: .actionSheet)
+    alert.addAction(UIAlertAction(title: "삭제", style: .destructive, handler: { [weak self] _ in
+      self?.onDelete?(alarm.id)
+      self?.dismiss(animated: true)
+    }))
+    alert.addAction(UIAlertAction(title: "취소", style: .cancel))
+    present(alert, animated: true)
   }
 
   private func showNoChangesAlert() {
