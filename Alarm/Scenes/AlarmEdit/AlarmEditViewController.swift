@@ -8,6 +8,7 @@
 import SnapKit
 import Then
 import UIKit
+import UserNotifications
 
 final class AlarmEditViewController: UIViewController {
   enum Mode { case create, edit(Alarm) }
@@ -111,6 +112,7 @@ final class AlarmEditViewController: UIViewController {
 
     setupLayout()
     presetIfEditing()
+    requestNotificationPermission()
   }
 
   override func viewWillAppear(_ animated: Bool) {
@@ -302,14 +304,9 @@ final class AlarmEditViewController: UIViewController {
     let s = subtitle.trimmingCharacters(in: .whitespacesAndNewlines)
 
     // 특수 케이스
-    if s.contains("주중") {
-      return [.mon, .tue, .wed, .thu, .fri]
-    }
-    if s.contains("주말") {
-      return [.sat, .sun]
-    }
+    if s.contains("주중") { return [.mon, .tue, .wed, .thu, .fri] }
+    if s.contains("주말") { return [.sat, .sun] }
     if s.contains("오늘") {
-      // 오늘 요일
       let w = Calendar.current.component(.weekday, from: Date())
       switch w {
       case 1: return [.sun]
@@ -340,11 +337,13 @@ final class AlarmEditViewController: UIViewController {
 
   @objc private func saveTapped() {
     let display = outputFormatter.string(from: datePicker.date)
+    let selectedDays = Set(weekdayView.selectedDays)
 
     switch mode {
     case .create:
       let subtitle = subtitleFromSelectedDays()
       let new = Alarm(time: display, subtitle: subtitle.isEmpty ? "주중" : subtitle, isOn: true)
+      scheduleAlarmNotifications(for: new, selectedDays: selectedDays)
       onSave?(new)
     case let .edit(old):
       var updated = old
@@ -354,6 +353,8 @@ final class AlarmEditViewController: UIViewController {
       if updated == old {
         showNoChangesAlert(); return
       }
+      cancelAlarmNotifications(for: old)
+      scheduleAlarmNotifications(for: updated, selectedDays: selectedDays)
       onSave?(updated)
     }
     dismiss(animated: true)
@@ -406,5 +407,94 @@ final class AlarmEditViewController: UIViewController {
                       of: Date())
     }
     return nil
+  }
+}
+
+// MARK: - 알림 예약/취소 유틸
+
+private extension AlarmEditViewController {
+  var alarmSoundName: String { "radial.caf" }
+
+  func requestNotificationPermission() {
+    UNUserNotificationCenter.current().getNotificationSettings { settings in
+      guard settings.authorizationStatus != .authorized else { return }
+      UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { _, err in
+        if let err = err { print("requestAuthorization error: \(err)") }
+      }
+    }
+  }
+
+  func baseIdentifier(for alarm: Alarm) -> String {
+    "alarm.\(alarm.id.uuidString)"
+  }
+
+  // 알람 시간 오전/오후 h:mm → (hour, minute)
+  func timeComponents(from display: String) -> DateComponents? {
+    if let d = parserKO.date(from: display) ?? parserEN.date(from: display) {
+      let cal = Calendar.current
+      return cal.dateComponents([.hour, .minute], from: d)
+    }
+    return nil
+  }
+
+  // 오늘 기준 다음 발생 시각
+  func nextDate(forHour hour: Int, minute: Int) -> Date {
+    let cal = Calendar.current
+    let now = Date()
+    let todayFire = cal.date(bySettingHour: hour, minute: minute, second: 0, of: now)!
+    if todayFire > now { return todayFire }
+    return cal.date(byAdding: .day, value: 1, to: todayFire)!
+  }
+
+  // 요일 선택 기반 예약
+  func scheduleAlarmNotifications(for alarm: Alarm, selectedDays: Set<Weekday>) {
+    let center = UNUserNotificationCenter.current()
+
+    guard let comps = timeComponents(from: alarm.time),
+          let hour = comps.hour, let minute = comps.minute
+    else {
+      print("scheduleAlarmNotifications: invalid time \(alarm.time)")
+      return
+    }
+
+    // 공통 콘텐츠
+    let content = UNMutableNotificationContent()
+    content.title = "알람"
+    content.body = alarm.subtitle.isEmpty ? "알람" : alarm.subtitle
+    content.sound = UNNotificationSound(named: .init(alarmSoundName))
+    if #available(iOS 15.0, *) { content.interruptionLevel = .timeSensitive }
+
+    let base = baseIdentifier(for: alarm)
+
+    if selectedDays.isEmpty {
+      // 오늘 한 번만
+      let next = nextDate(forHour: hour, minute: minute)
+      let dc = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute], from: next)
+      let trigger = UNCalendarNotificationTrigger(dateMatching: dc, repeats: false)
+      let req = UNNotificationRequest(identifier: "\(base).once", content: content, trigger: trigger)
+      center.add(req) { if let e = $0 { print("add once error: \(e)") } }
+      return
+    }
+
+    // 요일 반복(월~일 개별 예약)
+    for day in selectedDays {
+      var dc = DateComponents()
+      dc.weekday = day.rawValueForCalendar
+      dc.hour = hour
+      dc.minute = minute
+      let trigger = UNCalendarNotificationTrigger(dateMatching: dc, repeats: true)
+      let id = "\(base).weekday.\(day.rawValueForCalendar)"
+      let req = UNNotificationRequest(identifier: id, content: content, trigger: trigger)
+      center.add(req) { if let e = $0 { print("add weekday error: \(e)") } }
+    }
+  }
+
+  // 기존 알람 예약 전부 취소
+  func cancelAlarmNotifications(for alarm: Alarm) {
+    let base = baseIdentifier(for: alarm)
+    var ids = ["\(base).once"]
+    ids += (1 ... 7).map { "\(base).weekday.\($0)" }
+    UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ids)
+    UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: ids)
   }
 }

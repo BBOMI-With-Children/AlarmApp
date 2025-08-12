@@ -12,4 +12,11 @@ struct Alarm: Codable, Equatable {
   var time: String // 알람 시간
   var subtitle: String // 반복 주기
   var isOn: Bool // 알람 ON/OFF
+
+  init(id: UUID = .init(), time: String, subtitle: String, isOn: Bool) {
+    self.id = id
+    self.time = time
+    self.subtitle = subtitle
+    self.isOn = isOn
+  }
 }
