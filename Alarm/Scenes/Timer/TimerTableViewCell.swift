@@ -99,6 +99,7 @@ class TimerTableViewCell: UITableViewCell {
     button  // 활성 상태에 따른 아이콘 토글
       .setImage(item.isActive ? UIImage(systemName: "pause.fill") : UIImage(systemName: "play.fill"), for: .normal)
     button.removeTarget(nil, action: nil, for: .allEvents)  // 재사용된 cell에서 중복 실행 방지를 위한 target remove
+    timerLabel.textColor = item.isActive ? .white : .gray // 일시정지일 때 텍스트 회색으로
     button.addTarget(self, action: #selector(toggleActive), for: .touchUpInside)  // 아이콘 토글
   }
 
