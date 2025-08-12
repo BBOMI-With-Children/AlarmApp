@@ -135,7 +135,8 @@ final class WorldTimeCitySelectionViewController: UIViewController {
 
 extension WorldTimeCitySelectionViewController: UITableViewDelegate {
   func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-    let row = viewModel.rows.value[indexPath.row]
+    let section = viewModel.sections.value[indexPath.section]
+    let row = section.rows[indexPath.row]
     didSelectCity.accept(row)
     dismiss(animated: true)
   }
@@ -145,12 +146,13 @@ extension WorldTimeCitySelectionViewController: UITableViewDelegate {
 
 extension WorldTimeCitySelectionViewController: UITableViewDataSource {
   func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-    return viewModel.rows.value.count
+    return viewModel.sections.value[section].rows.count
   }
 
   func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
     let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
-    let row = viewModel.rows.value[indexPath.row]
+    let section = viewModel.sections.value[indexPath.section]
+    let row = section.rows[indexPath.row]
     cell.textLabel?.text = row.displayText
     cell.textLabel?.textColor = .white
     cell.backgroundColor = backgroundColor
@@ -165,6 +167,30 @@ extension WorldTimeCitySelectionViewController: UITableViewDataSource {
   }
 
   func numberOfSections(in tableView: UITableView) -> Int {
-    1
+    return viewModel.sections.value.count // 섹션 개수만큼
+  }
+  
+  // titleForHeaderInSection: 섹션 헤더 제목
+  func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+    return viewModel.sections.value[section].title
+  }
+  
+  // sectionIndexTitles(for:): 오른쪽에 세로로 표시되는 인덱스 목록
+  func sectionIndexTitles(for tableView: UITableView) -> [String]? {
+    tableView.sectionIndexColor = mainColor
+    return viewModel.sections.value.map { $0.title } // 제목만 반환
+  }
+  
+  // willDisplayHeaderView: 헤더 뷰 표시 직전
+  func tableView(_ tableView: UITableView, willDisplayHeaderView view: UIView, forSection section: Int) {
+    guard let header = view as? UITableViewHeaderFooterView else { return }
+    header.contentView.backgroundColor = backgroundColor // 헤더뷰 색상 변경
+  }
+  
+  // 오른쪽 세로 인덱스 목록 Tap 하면, 몇 번째 섹션으로 스크롤할지 결정해주는 고맙고 고마운 메서드
+  // 동일하면 구현 안해도 된다지만, 일단 써봄
+  func tableView(_ tableView: UITableView, sectionForSectionIndexTitle title: String, at index: Int) -> Int {
+    // sections와 인덱스 타이틀 순서가 동일해서 index 그대로 반환
+    return index
   }
 }
