@@ -17,7 +17,7 @@ struct CityRow {
 }
 
 struct CitySection {
-  let title: String  // "A" ~ "Z"
+  let title: String // "A" ~ "Z"
   var rows: [CityRow]
 }
 

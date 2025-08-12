@@ -184,7 +184,9 @@ extension WorldTimeCitySelectionViewController: UITableViewDataSource {
   // willDisplayHeaderView: 헤더 뷰 표시 직전
   func tableView(_ tableView: UITableView, willDisplayHeaderView view: UIView, forSection section: Int) {
     guard let header = view as? UITableViewHeaderFooterView else { return }
-    header.contentView.backgroundColor = backgroundColor // 헤더뷰 색상 변경
+    // apple이 제공하는 VisualEffectView 대신, 새로운 UIView로 색상 통일
+    header.backgroundView = UIView(frame: header.bounds)
+    header.backgroundView?.backgroundColor = backgroundColor
   }
   
   // 오른쪽 세로 인덱스 목록 Tap 하면, 몇 번째 섹션으로 스크롤할지 결정해주는 고맙고 고마운 메서드
