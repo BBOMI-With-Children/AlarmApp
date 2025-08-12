@@ -10,12 +10,13 @@ import RxCocoa
 import RxSwift
 
 final class StopwatchViewModel {
+  private let stopwatchUserDefaults = StopWatchUserDefaults()
   // 현재 타이머가 실행 중인지 알려주는 상태 (true: 실행중, false: 멈춤)
   let isRunning = BehaviorRelay<Bool>(value: false)
   // 스톱워치가 시작된 이후 경과된 시간 (TimeInterval은 초 단위: Double 타입)
   let timePassed = BehaviorRelay<TimeInterval>(value: 0)
   // 랩타임
-  let laps = BehaviorRelay<[LapTime]>(value: [])
+  let laps = BehaviorRelay<[StopWatchModel.Lap]>(value: [])
 
   // 구독 해제를 원하는 시점을 직접 제어할 수 있어서 DisposeBag 대신 사용
   private var timerDisposable: Disposable?
@@ -25,6 +26,10 @@ final class StopwatchViewModel {
   private var totalTime: TimeInterval = 0
   // 이전 랩타임 시점의 전체 시간
   private var lastLapTotalTime: TimeInterval = 0
+
+  init() {
+    loadState()
+  }
 }
 
 // MARK: - 타이머 로직
@@ -39,6 +44,7 @@ extension StopwatchViewModel {
   private func startTimer() {
     isRunning.accept(true) // 실행 상태를 true로 변경
     startDate = Date() // 현재 시각 저장 (타이머 시작 기준점)
+    saveState() // UserDefualts 저장
 
     // 0.01초마다 실행되는 타이머 구독 생성
     timerDisposable = Observable<Int>.interval(.milliseconds(10), scheduler: MainScheduler.instance)
@@ -62,6 +68,7 @@ extension StopwatchViewModel {
     timerDisposable?.dispose()
     timerDisposable = nil
     startDate = nil // 시작 시각 초기화
+    saveState() // UserDefualts 저장
   }
 
   // 타이머 초기화
@@ -71,6 +78,7 @@ extension StopwatchViewModel {
     timePassed.accept(0)
     laps.accept([]) // 랩타임 목록 초기화
     lastLapTotalTime = 0
+    stopwatchUserDefaluts.clear()
   }
 }
 
@@ -82,13 +90,13 @@ extension StopwatchViewModel {
     let lapDuration = currentTotalTime - lastLapTotalTime
 
     let lapNumber = laps.value.count + 1
-    let newLap = LapTime(number: lapNumber, time: lapDuration)
+    let newLap = StopWatchModel.Lap(number: lapNumber, time: lapDuration)
 
     var updatedLaps = laps.value
     updatedLaps.insert(newLap, at: 0) // 최신 랩이 위로 오도록
-    laps.accept(updatedLaps)
-
     lastLapTotalTime = currentTotalTime
+    laps.accept(updatedLaps)
+    saveState()
   }
 }
 
@@ -108,5 +116,41 @@ extension StopwatchViewModel {
   func circleProgress(_ time: TimeInterval) -> CGFloat {
     let seconds = time - Double(Int(time / 60) * 60) // 전체 경과 시간에서 60초 단위 시간을 빼, 현재 분에서 경과한 초만 구함
     return CGFloat(seconds / 60.0) // 0.0 ~ 1.0
+  }
+}
+
+// MARK: - UserDefaults
+
+extension StopwatchViewModel {
+  private func saveState() {
+    let model = StopWatchModel(
+      isRunning: isRunning.value,
+      startDate: startDate,
+      totalTime: totalTime,
+      lastLapTotalTime: lastLapTotalTime,
+      laps: laps.value
+    )
+    stopwatchUserDefaluts.save(model)
+  }
+
+  private func loadState() {
+    guard let model = stopwatchUserDefaluts.load() else { return }
+    isRunning.accept(model.isRunning)
+    totalTime = model.totalTime
+    lastLapTotalTime = model.lastLapTotalTime
+    laps.accept(model.laps)
+    startDate = model.startDate
+
+    if model.isRunning, let start = model.startDate {
+      let now = Date() // 현재 시각
+      let timeDifference = now.timeIntervalSince(start) // 마지막 시작 시각 이후 경과 시간
+      totalTime += timeDifference // 총 경과 시간에 timeDefference 반영
+      startDate = now
+      timePassed.accept(totalTime)
+      startTimer()
+    } else {
+      timePassed.accept(totalTime)
+      startDate = nil
+    }
   }
 }

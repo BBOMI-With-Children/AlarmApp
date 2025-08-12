@@ -9,7 +9,7 @@ import RxCocoa
 import RxSwift
 import UIKit
 
-class StopwatchCircleView: UIView {
+final class StopwatchCircleView: UIView {
   // MARK: - Properties
 
   // 진행 경로의 전체 배경 원
