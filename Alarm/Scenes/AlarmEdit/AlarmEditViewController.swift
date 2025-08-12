@@ -285,11 +285,53 @@ final class AlarmEditViewController: UIViewController {
   }
 
   private func presetIfEditing() {
-    if case let .edit(alarm) = mode,
-       let d = parseDisplayTime(alarm.time)
-    {
+    guard case let .edit(alarm) = mode else { return }
+
+    // 시간 프리셋
+    if let d = parseDisplayTime(alarm.time) {
       datePicker.setDate(d, animated: false)
     }
+
+    // 요일 프리셋
+    weekdayView.selectedDays = preselectDays(from: alarm.subtitle)
+  }
+
+  // MARK: - Subtitle -> Weekday Set
+
+  private func preselectDays(from subtitle: String) -> Set<Weekday> {
+    let s = subtitle.trimmingCharacters(in: .whitespacesAndNewlines)
+
+    // 특수 케이스
+    if s.contains("주중") {
+      return [.mon, .tue, .wed, .thu, .fri]
+    }
+    if s.contains("주말") {
+      return [.sat, .sun]
+    }
+    if s.contains("오늘") {
+      // 오늘 요일
+      let w = Calendar.current.component(.weekday, from: Date())
+      switch w {
+      case 1: return [.sun]
+      case 2: return [.mon]
+      case 3: return [.tue]
+      case 4: return [.wed]
+      case 5: return [.thu]
+      case 6: return [.fri]
+      default: return [.sat]
+      }
+    }
+    // ㅇ요일마다 같은 케이스 대비
+    let cleaned = s.replacingOccurrences(of: "요일", with: "")
+      .replacingOccurrences(of: "마다", with: "")
+    // 요일 글자만 스캔
+    let map: [Character: Weekday] = ["월": .mon, "화": .tue, "수": .wed, "목": .thu, "금": .fri, "토": .sat, "일": .sun]
+
+    var set = Set<Weekday>()
+    for ch in cleaned {
+      if let day = map[ch] { set.insert(day) }
+    }
+    return set
   }
 
   // MARK: - Actions
