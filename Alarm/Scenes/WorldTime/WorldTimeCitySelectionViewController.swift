@@ -14,6 +14,8 @@ import UIKit
 final class WorldTimeCitySelectionViewController: UIViewController {
   // MARK: - Properties
   
+  let didSelectCity = PublishRelay<CityRow>() // 방출 역할
+  
   private let disposeBag = DisposeBag()
   
   private let backgroundColor = UIColor(named: "backgroundColor")
@@ -48,6 +50,7 @@ final class WorldTimeCitySelectionViewController: UIViewController {
     $0.backgroundColor = backgroundColor
     $0.register(UITableViewCell.self, forCellReuseIdentifier: "Cell")
     $0.dataSource = self
+    $0.delegate = self
     $0.separatorStyle = .singleLine
     $0.separatorColor = .systemGray4
     $0.separatorInset = UIEdgeInsets(top: 0, left: 8, bottom: 0, right: 8)
@@ -62,6 +65,13 @@ final class WorldTimeCitySelectionViewController: UIViewController {
     bind()
   }
   
+  override func viewWillAppear(_ animated: Bool) {
+    super.viewWillAppear(animated)
+    searchBar.text = nil
+    searchBar.resignFirstResponder() // 키보드 닫기
+    viewModel.filter("")
+  }
+
   // MARK: - setupUI
 
   private func setupUI() {
@@ -120,6 +130,14 @@ final class WorldTimeCitySelectionViewController: UIViewController {
         vc.tableView.reloadData()
       }
       .disposed(by: disposeBag)
+  }
+}
+
+extension WorldTimeCitySelectionViewController: UITableViewDelegate {
+  func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+    let row = viewModel.rows.value[indexPath.row]
+    didSelectCity.accept(row)
+    dismiss(animated: true)
   }
 }
 

@@ -77,4 +77,13 @@ final class AlarmManager {
       save()
     }
   }
+
+  func update(_ alarm: Alarm) {
+    var list = alarms.value
+    if let idx = list.firstIndex(where: { $0.id == alarm.id }) {
+      list[idx] = alarm
+      alarms.accept(list)
+      save()
+    }
+  }
 }
