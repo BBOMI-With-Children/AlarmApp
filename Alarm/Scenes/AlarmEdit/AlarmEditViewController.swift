@@ -59,7 +59,6 @@ final class AlarmEditViewController: UIViewController {
 
   private let soundTitle = UILabel()
   private let soundValue = UILabel()
-  private let soundChevron = UIImageView(image: UIImage(systemName: "chevron.right"))
 
   private let snoozeTitle = UILabel()
   private let snoozeSwitch = UISwitch()
@@ -230,24 +229,16 @@ final class AlarmEditViewController: UIViewController {
       $0.font = .systemFont(ofSize: 17)
       $0.textColor = .white
     }
-    soundChevron.do {
-      $0.tintColor = .white
-      $0.contentMode = .scaleAspectFit
-    }
 
-    [soundTitle, soundValue, soundChevron].forEach { soundRow.addSubview($0) }
+    [soundTitle, soundValue].forEach { soundRow.addSubview($0) }
     soundTitle.snp.makeConstraints {
       $0.leading.equalToSuperview().inset(18)
       $0.centerY.equalToSuperview()
     }
-    soundChevron.snp.makeConstraints {
-      $0.trailing.equalToSuperview().inset(16)
-      $0.centerY.equalToSuperview()
-      $0.width.height.equalTo(16)
-    }
+
     soundValue.snp.makeConstraints {
       $0.centerY.equalToSuperview()
-      $0.trailing.equalTo(soundChevron.snp.leading).offset(-8)
+      $0.trailing.equalToSuperview().inset(18)
       $0.leading.greaterThanOrEqualTo(soundTitle.snp.trailing).offset(12)
     }
 
