@@ -44,7 +44,26 @@ final class AlarmEditViewController: UIViewController {
     $0.configuration = cfg
     $0.addTarget(self, action: #selector(saveTapped), for: .touchUpInside)
     $0.tintColor = UIColor(named: "mainColor")
-  } 
+  }
+
+  // MARK: - UI: 섹션
+
+  private let sectionView = UIView()
+  private let labelRow = UIView()
+  private let soundRow = UIView()
+  private let snoozeRow = UIView()
+
+  private let labelTitle = UILabel()
+  private let labelValue = UILabel()
+
+  private let soundTitle = UILabel()
+  private let soundValue = UILabel()
+  private let soundChevron = UIImageView(image: UIImage(systemName: "chevron.right"))
+
+  private let snoozeTitle = UILabel()
+  private let snoozeSwitch = UISwitch()
+
+  private let deleteButton = UIButton(type: .system)
 
   // MARK: - Formatters
 
@@ -84,7 +103,7 @@ final class AlarmEditViewController: UIViewController {
   override func viewDidLoad() {
     super.viewDidLoad()
 
-    view.backgroundColor = UIColor(named: "backgroundColor") ?? .systemBackground
+    view.backgroundColor = UIColor(named: "backgroundColor")
     title = "알람 편집"
 
     navigationItem.leftBarButtonItem = UIBarButtonItem(customView: cancelButton)
@@ -133,6 +152,136 @@ final class AlarmEditViewController: UIViewController {
       $0.top.equalTo(datePicker.snp.bottom).offset(24)
       $0.leading.trailing.equalToSuperview()
     }
+
+    view.addSubview(sectionView)
+    sectionView.do {
+      $0.backgroundColor = UIColor(named: "sectionColor")
+      $0.layer.cornerRadius = 18
+      $0.layer.masksToBounds = true
+    }
+    sectionView.snp.makeConstraints {
+      $0.top.equalTo(weekdayView.snp.bottom).offset(16)
+      $0.leading.trailing.equalToSuperview().inset(16)
+    }
+
+    for row in [labelRow, soundRow, snoozeRow] {
+      sectionView.addSubview(row)
+      row.backgroundColor = UIColor(named: "modalColor")
+      row.snp.makeConstraints { $0.height.equalTo(56) }
+    }
+    labelRow.snp.makeConstraints { $0.top.leading.trailing.equalToSuperview() }
+    soundRow.snp.makeConstraints {
+      $0.top.equalTo(labelRow.snp.bottom)
+      $0.leading.trailing.equalToSuperview()
+    }
+    snoozeRow.snp.makeConstraints {
+      $0.top.equalTo(soundRow.snp.bottom)
+      $0.leading.trailing.bottom.equalToSuperview()
+    }
+
+    func addDivider(below view: UIView) {
+      let line = UIView()
+      line.backgroundColor = UIColor.white.withAlphaComponent(0.1)
+      sectionView.addSubview(line)
+      line.snp.makeConstraints {
+        $0.top.equalTo(view.snp.bottom)
+        $0.leading.trailing.equalToSuperview().inset(16)
+        $0.height.equalTo(0.5)
+      }
+    }
+    addDivider(below: labelRow)
+    addDivider(below: soundRow)
+
+    // 레이블 Row
+    labelTitle.do {
+      $0.text = "레이블"
+      $0.font = .systemFont(ofSize: 17)
+      $0.textColor = .white
+    }
+    labelValue.do {
+      $0.text = "Alarm"
+      $0.font = .systemFont(ofSize: 17)
+      $0.textColor = .white
+      $0.textAlignment = .right
+      $0.alpha = 1.0
+    }
+
+    [labelTitle, labelValue].forEach { labelRow.addSubview($0) }
+    labelTitle.snp.makeConstraints {
+      $0.leading.equalToSuperview().inset(18)
+      $0.centerY.equalToSuperview()
+    }
+    labelValue.snp.makeConstraints {
+      $0.trailing.equalToSuperview().inset(18)
+      $0.centerY.equalToSuperview()
+      $0.leading.greaterThanOrEqualTo(labelTitle.snp.trailing).offset(12)
+    }
+
+    // 사운드 Row
+    soundTitle.do {
+      $0.text = "사운드"
+      $0.font = .systemFont(ofSize: 17)
+      $0.textColor = .white
+    }
+    soundValue.do {
+      $0.text = "래디얼"
+      $0.font = .systemFont(ofSize: 17)
+      $0.textColor = .white
+    }
+    soundChevron.do {
+      $0.tintColor = .white
+      $0.contentMode = .scaleAspectFit
+    }
+
+    [soundTitle, soundValue, soundChevron].forEach { soundRow.addSubview($0) }
+    soundTitle.snp.makeConstraints {
+      $0.leading.equalToSuperview().inset(18)
+      $0.centerY.equalToSuperview()
+    }
+    soundChevron.snp.makeConstraints {
+      $0.trailing.equalToSuperview().inset(16)
+      $0.centerY.equalToSuperview()
+      $0.width.height.equalTo(16)
+    }
+    soundValue.snp.makeConstraints {
+      $0.centerY.equalToSuperview()
+      $0.trailing.equalTo(soundChevron.snp.leading).offset(-8)
+      $0.leading.greaterThanOrEqualTo(soundTitle.snp.trailing).offset(12)
+    }
+
+    // 다시 알림 Row
+    snoozeTitle.do {
+      $0.text = "다시 알림"
+      $0.font = .systemFont(ofSize: 17)
+      $0.textColor = .white
+    }
+    snoozeSwitch.onTintColor = UIColor(named: "mainColor") ?? .systemBlue
+    [snoozeTitle, snoozeSwitch].forEach { snoozeRow.addSubview($0) }
+    snoozeTitle.snp.makeConstraints {
+      $0.leading.equalToSuperview().inset(18)
+      $0.centerY.equalToSuperview()
+    }
+    snoozeSwitch.snp.makeConstraints {
+      $0.trailing.equalToSuperview().inset(16)
+      $0.centerY.equalToSuperview()
+    }
+
+    // 삭제하기 버튼
+    view.addSubview(deleteButton)
+    deleteButton.do {
+      $0.setTitle("삭제하기", for: .normal)
+      $0.setTitleColor(.systemRed, for: .normal)
+      $0.backgroundColor = UIColor(named: "modalColor")
+      $0.layer.cornerRadius = 14
+      $0.layer.masksToBounds = true
+    }
+
+    deleteButton.snp.makeConstraints {
+      $0.top.equalTo(sectionView.snp.bottom).offset(20)
+      $0.leading.trailing.equalToSuperview().inset(16)
+      $0.height.equalTo(46)
+      $0.bottom.lessThanOrEqualTo(view.safeAreaLayoutGuide).inset(12)
+    }
   }
 
   private func presetIfEditing() {
@@ -149,21 +298,19 @@ final class AlarmEditViewController: UIViewController {
 
   @objc private func saveTapped() {
     let display = outputFormatter.string(from: datePicker.date)
-    let subtitle = subtitleFromSelectedDays()
 
     switch mode {
     case .create:
       let subtitle = subtitleFromSelectedDays()
       let new = Alarm(time: display, subtitle: subtitle.isEmpty ? "주중" : subtitle, isOn: true)
       onSave?(new)
-
     case let .edit(old):
       var updated = old
       updated.time = display
-      updated.subtitle = subtitle
+      let sub = subtitleFromSelectedDays()
+      if !sub.isEmpty { updated.subtitle = sub }
       if updated == old {
-        showNoChangesAlert()
-        return
+        showNoChangesAlert(); return
       }
       onSave?(updated)
     }
