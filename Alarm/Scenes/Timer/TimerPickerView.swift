@@ -20,16 +20,20 @@ final class TimerPickerView: UIView {
 
   private let hourLabel = UILabel().then {
     $0.text = "시간"
+    $0.textColor = .white
   }
   private let minuteLabel = UILabel().then {
     $0.text = "분"
+    $0.textColor = .white
   }
   private let secondLabel = UILabel().then {
     $0.text = "초"
+    $0.textColor = .white
   }
 
   private let userLabel = UILabel().then {
     $0.text = "레이블"
+    $0.textColor = .white
     $0.setContentHuggingPriority(.required, for: .horizontal)
     $0.setContentCompressionResistancePriority(.required, for: .horizontal)
   }
