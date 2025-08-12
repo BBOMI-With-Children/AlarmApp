@@ -14,6 +14,8 @@ class AddTimerViewController: UIViewController {
 
   override func viewDidLoad() {
     super.viewDidLoad()
+    overrideUserInterfaceStyle = .dark
+
     configureUI()
     setupViews()
     setupNavigationBar()
@@ -27,6 +29,9 @@ class AddTimerViewController: UIViewController {
     view.backgroundColor = UIColor(named: "backgroundColor")
     title = "타이머"
     navigationController?.navigationBar.prefersLargeTitles = true
+    navigationController?.navigationBar.largeTitleTextAttributes = [
+      .foregroundColor: UIColor.white
+    ]
     navigationItem.largeTitleDisplayMode = .always
   }
 
