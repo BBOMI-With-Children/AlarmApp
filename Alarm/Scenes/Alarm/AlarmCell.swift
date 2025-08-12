@@ -86,20 +86,20 @@ final class AlarmCell: UITableViewCell {
     }
 
     ampmLabel.do {
-      $0.font = .systemFont(ofSize: 14, weight: .semibold)
+      $0.font = .systemFont(ofSize: 16, weight: .regular)
       $0.textColor = .secondaryLabel
       $0.setContentHuggingPriority(.required, for: .horizontal)
       $0.setContentCompressionResistancePriority(.required, for: .horizontal)
     }
 
     timeLabel.do {
-      $0.font = .systemFont(ofSize: 32, weight: .regular)
+      $0.font = .systemFont(ofSize: 38, weight: .regular)
       $0.textColor = .label
       $0.setContentCompressionResistancePriority(.required, for: .horizontal)
     }
 
     subtitleLabel.do {
-      $0.font = .systemFont(ofSize: 14, weight: .semibold)
+      $0.font = .systemFont(ofSize: 16, weight: .regular)
       $0.textColor = UIColor(named: "mainColor") ?? .systemBlue
       $0.numberOfLines = 1
     }
