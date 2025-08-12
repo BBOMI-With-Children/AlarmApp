@@ -17,6 +17,10 @@ class AddTimerViewController: UIViewController {
     configureUI()
     setupViews()
     setupNavigationBar()
+    timerPicker.onTimeChanged = { [weak self] _ in
+      self?.toggleStartButtonState()
+    }
+    toggleStartButtonState()
   }
 
   private func configureUI() {
@@ -35,6 +39,11 @@ class AddTimerViewController: UIViewController {
     }
   }
 
+  private func toggleStartButtonState() {
+    let enabled = timerPicker.selectedTimeInterval() > 0
+    navigationItem.rightBarButtonItem?.isEnabled = enabled
+  }
+
   // 내비게이션 버튼
   private func setupNavigationBar() {
     navigationItem.rightBarButtonItem = UIBarButtonItem(
@@ -44,6 +53,7 @@ class AddTimerViewController: UIViewController {
       action: #selector(addTimer)
     ).then {
       $0.tintColor = UIColor(named: "mainColor")
+      $0.isEnabled = false
     }
 
     navigationItem.leftBarButtonItem = UIBarButtonItem(
@@ -56,10 +66,11 @@ class AddTimerViewController: UIViewController {
       $0.tintColor = UIColor(named: "mainColor")
     }
   }
-  
+
   // MARK: Button function
 
-  @objc private func addTimer() { // 타이머 추가(userDefault에 저장) 액션
+  @objc private func addTimer() {  // 타이머 추가(userDefault에 저장) 액션
+    guard timerPicker.selectedTimeInterval() > 0 else { return }
     let selectedSeconds = timerPicker.selectedTimeInterval()
     let time = timerPicker.selectedTimeComponents()
     var userLabelText = timerPicker.userLabelText()
@@ -74,7 +85,7 @@ class AddTimerViewController: UIViewController {
         userLabelText += " \(time.second)초"
       }
     }
-    
+
     let newItem = TimerItem(
       id: UUID(),
       time: selectedSeconds,
@@ -83,7 +94,9 @@ class AddTimerViewController: UIViewController {
     )
 
     // userDefault에 저장
-    TimerDataManager.shared.addTimer(newItem)
+    TimerDataManager.shared.mutate { items in
+      items.append(newItem)
+    }
     dismiss(animated: true)
   }
 }
