@@ -78,7 +78,7 @@ extension StopwatchViewModel {
     timePassed.accept(0)
     laps.accept([]) // 랩타임 목록 초기화
     lastLapTotalTime = 0
-    stopwatchUserDefaluts.clear()
+    stopwatchUserDefaults.clear()
   }
 }
 
@@ -130,11 +130,11 @@ extension StopwatchViewModel {
       lastLapTotalTime: lastLapTotalTime,
       laps: laps.value
     )
-    stopwatchUserDefaluts.save(model)
+    stopwatchUserDefaults.save(model)
   }
 
   private func loadState() {
-    guard let model = stopwatchUserDefaluts.load() else { return }
+    guard let model = stopwatchUserDefaults.load() else { return }
     isRunning.accept(model.isRunning)
     totalTime = model.totalTime
     lastLapTotalTime = model.lastLapTotalTime
