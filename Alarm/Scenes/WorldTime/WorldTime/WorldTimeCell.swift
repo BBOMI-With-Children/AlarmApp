@@ -111,7 +111,7 @@ final class WorldTimeCell: UITableViewCell {
     }
     
     timeLabel.snp.makeConstraints {
-      $0.trailing.equalToSuperview()
+      $0.trailing.equalTo(contentStackView.layoutMarginsGuide.snp.trailing)
       $0.centerY.equalToSuperview()
     }
   }
