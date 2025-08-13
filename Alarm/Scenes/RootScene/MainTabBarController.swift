@@ -22,7 +22,7 @@ final class MainTabBarController: UITabBarController {
 
   private func configureTabBar() {
     // 뷰 컨트롤러, 탭 아이템
-    let worldVC = WorldViewController()
+    let worldVC = WorldTimeViewController()
     worldVC.tabBarItem = UITabBarItem(title: "세계 시계", image: UIImage(systemName: "globe"), tag: 0)
 
     let alarmVC = AlarmViewController()
@@ -48,12 +48,14 @@ final class MainTabBarController: UITabBarController {
     // 탭바 외관
     let appearance = UITabBarAppearance()
     // 배경 색 다크
-    appearance.backgroundColor = .black
+    appearance.backgroundColor = UIColor(named: "backgroundColor")
+
+    let mainColor = UIColor(named: "mainColor") ?? .systemBlue
 
     // 선택된 아이콘 색
     let selected = appearance.stackedLayoutAppearance.selected
-    selected.iconColor = .systemOrange
-    selected.titleTextAttributes = [.foregroundColor: UIColor.systemOrange]
+    selected.iconColor = mainColor
+    selected.titleTextAttributes = [.foregroundColor: mainColor]
 
     // 비선택 아이템 색
     let normal = appearance.stackedLayoutAppearance.normal
